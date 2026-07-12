@@ -43,7 +43,7 @@ function isFilled(grid: string[][], row: number, col: number): boolean {
 <style scoped>
 table {
   margin: auto;
-  border: 2px solid var(--grid-border);
+  border: 2px solid var(--border-primary);
   border-collapse: collapse;
 }
 
@@ -54,24 +54,25 @@ table {
   cursor: pointer;
   font-size: min(4vw, 4vh);
   font-weight: bolder;
-  border: 1px solid var(--grid-border);
+  border: 1px solid var(--border-secondary);
   text-align: center;
   vertical-align: middle;
   padding: 0;
   transition: background-color 0.05s ease;
   -webkit-tap-highlight-color: transparent;
+  color: var(--text-tertiary);
 }
 
 .cell:not(.filled) {
-  background-color: var(--cell-empty);
+  background-color: var(--bg-tertiary);
 }
 
 .cell.filled {
-  background-color: var(--cell-bg);
+  background-color: var(--bg-primary);
   color: var(--text-primary);
 }
 
 .cell.flashing:not(.filled) {
-  background-color: var(--cell-flash);
+  background-color: var(--accent);
 }
 </style>

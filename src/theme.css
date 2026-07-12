@@ -14,54 +14,40 @@
 
     --accent: #000000;
     --accent-contrast: #ffffff;
-
-    --cell-bg: #fdf4d8;
-    --cell-flash: #e18ae4;
-    --cell-empty: rgb(162, 31, 255);
-    --grid-border: #bcbaec;
 }
 
 /* ===== 深色主题（手动指定） ===== */
 [data-theme="dark"] {
-    --bg-primary: #02050c;
-    --bg-secondary: #1a1a2e;
-    --bg-tertiary: #16213e;
+    --bg-primary: #111111;
+    --bg-secondary: #1a1a1a;
+    --bg-tertiary: #242424;
 
     --text-primary: #e0e0e0;
-    --text-secondary: #8888aa;
-    --text-tertiary: #555577;
+    --text-secondary: #888888;
+    --text-tertiary: #555555;
 
-    --border-primary: #333356;
-    --border-secondary: #2a2a44;
+    --border-primary: #333333;
+    --border-secondary: #2a2a2a;
 
-    --accent: #bcbaec;
-    --accent-contrast: #02050c;
-
-    --cell-bg: #1a1a2e;
-    --cell-flash: #e18ae4;
-    --cell-empty: rgb(162, 31, 255);
-    --grid-border: #333356;
+    --accent: #ffffff;
+    --accent-contrast: #000000;
 }
 
+/* ===== 自动跟随系统（无手动指定时生效） ===== */
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme]) {
-        --bg-primary: #02050c;
-        --bg-secondary: #1a1a2e;
-        --bg-tertiary: #16213e;
+        --bg-primary: #111111;
+        --bg-secondary: #1a1a1a;
+        --bg-tertiary: #242424;
 
         --text-primary: #e0e0e0;
-        --text-secondary: #8888aa;
-        --text-tertiary: #555577;
+        --text-secondary: #888888;
+        --text-tertiary: #555555;
 
-        --border-primary: #333356;
-        --border-secondary: #2a2a44;
+        --border-primary: #333333;
+        --border-secondary: #2a2a2a;
 
-        --accent: #bcbaec;
-        --accent-contrast: #02050c;
-
-        --cell-bg: #1a1a2e;
-        --cell-flash: #e18ae4;
-        --cell-empty: rgb(162, 31, 255);
-        --grid-border: #333356;
+        --accent: #ffffff;
+        --accent-contrast: #000000;
     }
 }
