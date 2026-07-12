@@ -9,6 +9,7 @@ const props = defineProps<{
   timerSet: boolean;
   bpm: number;
   scaleId: number;
+  selectedDir: number;
 }>();
 
 const emit = defineEmits<{
@@ -16,6 +17,7 @@ const emit = defineEmits<{
   clear: [];
   changeBpm: [bpm: number];
   changeScale: [id: number];
+  selectDir: [dir: number];
   load: [url: string];
 }>();
 
@@ -80,6 +82,18 @@ const currentScaleName = ALL_SCALES[props.scaleId]?.name || ALL_SCALES[0].name;
           </DropdownItem>
         </template>
       </ScaleDropdown>
+    </div>
+
+    <div class="row dir-row">
+      <button
+        v-for="dir in [0, 1, 2, 3]"
+        :key="dir"
+        class="dir-btn"
+        :class="{ active: selectedDir === dir }"
+        @click="$emit('selectDir', dir)"
+      >
+        {{ ['↑', '→', '↓', '←'][dir] }}
+      </button>
     </div>
 
     <div class="divider" />
@@ -159,5 +173,31 @@ const currentScaleName = ALL_SCALES[props.scaleId]?.name || ALL_SCALES[0].name;
 .divider {
   width: 100%;
   border-top: 1px solid var(--border-secondary);
+}
+
+.dir-row {
+  gap: 0;
+}
+
+.dir-btn {
+  flex: 1;
+  padding: 1vh 0;
+  border: 1px solid var(--border-primary);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 18px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  margin-left: -1px;
+}
+
+.dir-btn:first-child {
+  margin-left: 0;
+}
+
+.dir-btn.active {
+  background: var(--accent);
+  color: var(--accent-contrast);
 }
 </style>

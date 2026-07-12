@@ -18,6 +18,8 @@ const {
   getURL,
   loadFromQuery,
   flashingCells,
+  selectedDir,
+  setSelectedDir,
 } = useGrid();
 
 const showUrl = ref(false);
@@ -87,10 +89,12 @@ onUnmounted(() => {
         :timer-set="timerSet"
         :bpm="bpm"
         :scale-id="scaleId"
+        :selected-dir="selectedDir"
         @toggle-timer="toggleTimer"
         @clear="clear"
         @change-bpm="changeBpm"
         @change-scale="changeScale"
+        @select-dir="setSelectedDir"
         @load="onLoad"
       />
       <div class="url-row">
