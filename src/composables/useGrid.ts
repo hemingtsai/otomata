@@ -1,13 +1,13 @@
 import * as Tone from "tone";
-import { ref, computed, onUnmounted } from "vue";
+import { ref, computed, shallowRef, onUnmounted } from "vue";
 import type { Widget } from "../types";
 import { GRID_SIZE, ALL_SCALES, convertBpmToInterval, convertIntervalToBpm } from "../constants";
 
 export function useGrid() {
   const gridSize = GRID_SIZE;
 
-  const widgets = ref<Record<number, Widget>>({});
-  const synths = ref<Record<number, Tone.Synth>>({});
+  const widgets = shallowRef<Record<number, Widget>>({});
+  const synths = shallowRef<Record<number, Tone.Synth>>({});
   const ctr = ref(0);
   const scaleId = ref(0);
   const interval = ref(convertBpmToInterval(150));
@@ -24,9 +24,7 @@ export function useGrid() {
     if (audioStarted) return;
     try {
       await Tone.start();
-      console.log("[Otomata] Tone.start() completed, context state:", Tone.getContext().state);
-    } catch (e) {
-      console.warn("[Otomata] Tone.start() failed, trying resume:", e);
+    } catch {
       await Tone.getContext().resume();
     }
 
@@ -39,7 +37,6 @@ export function useGrid() {
     }
 
     audioStarted = true;
-    console.log("[Otomata] Audio initialized, context state:", Tone.getContext().state);
   }
 
   function generateSynth(): Tone.Synth {
@@ -103,7 +100,6 @@ export function useGrid() {
     }
     const scale = ALL_SCALES[scaleId.value].scale;
     const note = scale[val % scale.length];
-    console.log("[Otomata] Playing note:", note, "pos:", pos, "dir:", dir);
     synth.triggerAttackRelease(note, "8n", Tone.now(), 0.3);
   }
 
@@ -215,7 +211,6 @@ export function useGrid() {
       tick();
     }, interval.value);
     timerSet.value = true;
-    console.log("[Otomata] Timer started, interval:", interval.value, "ms");
   }
 
   function unsetTimer() {
@@ -224,7 +219,6 @@ export function useGrid() {
       timerId = null;
     }
     timerSet.value = false;
-    console.log("[Otomata] Timer stopped");
   }
 
   // toggleTimer is async so ensureAudio runs with user gesture context intact
