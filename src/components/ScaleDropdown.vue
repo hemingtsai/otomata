@@ -61,7 +61,7 @@ onUnmounted(() => {
       </svg>
     </button>
     <div v-if="open" class="menu" @click.stop>
-      <slot :select="onSelect" :active="props.modelValue" />
+      <slot :onSelect="onSelect" :active="props.modelValue" />
     </div>
   </div>
 </template>
