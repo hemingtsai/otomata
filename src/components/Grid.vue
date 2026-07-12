@@ -17,6 +17,13 @@ function isFlashing(flashingCells: Set<string>, row: number, col: number): boole
 function isFilled(grid: string[][], row: number, col: number): boolean {
   return !!grid[row][col];
 }
+
+function cellFontSize(val: string): string {
+  const len = val.length;
+  if (len <= 1) return "";
+  if (len === 2) return "font-size: min(3vw, 3vh)";
+  return "font-size: min(2.4vw, 2.4vh)";
+}
 </script>
 
 <template>
@@ -31,6 +38,7 @@ function isFilled(grid: string[][], row: number, col: number): boolean {
             filled: isFilled(grid, rowIdx, colIdx),
             flashing: isFlashing(flashingCells, rowIdx, colIdx) && !isFilled(grid, rowIdx, colIdx),
           }"
+          :style="cellFontSize(cellVal)"
           @click="$emit('cellClick', colIdx, rowIdx)"
         >
           {{ cellVal }}
