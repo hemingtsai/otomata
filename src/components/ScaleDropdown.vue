@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, nextTick, onUnmounted } from "vue";
+import { ALL_SCALES } from "../constants";
 
 const props = defineProps<{
   modelValue: number;
-  placeholder?: string;
 }>();
 
 const emit = defineEmits<{
@@ -45,9 +45,7 @@ onUnmounted(() => {
 <template>
   <div ref="triggerRef" class="dropdown">
     <button class="trigger" @click.stop="toggle">
-      <span class="trigger-text">
-        <slot name="label" />
-      </span>
+      <span class="trigger-text">{{ ALL_SCALES[props.modelValue]?.name || ALL_SCALES[0].name }}</span>
       <svg
         class="arrow"
         :class="{ open }"
@@ -61,7 +59,15 @@ onUnmounted(() => {
       </svg>
     </button>
     <div v-if="open" class="menu" @click.stop>
-      <slot :onSelect="onSelect" :active="props.modelValue" />
+      <button
+        v-for="(s, idx) in ALL_SCALES"
+        :key="idx"
+        class="menu-item"
+        :class="{ selected: props.modelValue === idx }"
+        @click="onSelect(idx)"
+      >
+        {{ s.name }}
+      </button>
     </div>
   </div>
 </template>
@@ -111,5 +117,27 @@ onUnmounted(() => {
   border: 1px solid var(--border-primary);
   border-top: none;
   background: var(--bg-primary);
+}
+
+.menu-item {
+  width: 100%;
+  padding: 1.2vh 1.5vh;
+  border: none;
+  border-bottom: 1px solid var(--border-secondary);
+  background: transparent;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-item.selected {
+  background: var(--bg-secondary);
 }
 </style>
