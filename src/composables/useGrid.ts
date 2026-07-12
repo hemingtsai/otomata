@@ -108,14 +108,13 @@ export function useGrid() {
   }
 
   function tick() {
-    let w = JSON.parse(JSON.stringify(widgets.value)) as Record<number, Widget>;
-    w = handleCollisions(w);
-
+    // Sound detection: check original state BEFORE any modifications
+    // (original code uses this.state.widgets which is the pre-setState state)
     const soundedRows: number[] = [];
     const soundedCols: number[] = [];
 
-    Object.keys(w).forEach((idx) => {
-      const widget = w[Number(idx)];
+    Object.keys(widgets.value).forEach((idx) => {
+      const widget = widgets.value[Number(idx)];
       if (didHitWall(widget.pos, widget.dir)) {
         makeSound(widget.pos, widget.dir, synths.value[Number(idx)]);
         if (widget.dir % 2 === 1) {
@@ -126,7 +125,10 @@ export function useGrid() {
       }
     });
 
-    // Move widgets
+    // Handle collisions, then move widgets
+    let w = JSON.parse(JSON.stringify(widgets.value)) as Record<number, Widget>;
+    w = handleCollisions(w);
+
     Object.keys(w).forEach((idx) => {
       const widget = w[Number(idx)];
       if (didHitWall(widget.pos, widget.dir)) {
@@ -149,8 +151,6 @@ export function useGrid() {
     grid.value = updateGrid();
 
     flashCells({ rows: soundedRows, cols: soundedCols });
-
-    return { rows: soundedRows, cols: soundedCols };
   }
 
   function handleCellClick(pos0: number, pos1: number) {

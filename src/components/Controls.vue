@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import Button from "./Button.vue";
 import ScaleDropdown from "./ScaleDropdown.vue";
+import DropdownItem from "./DropdownItem.vue";
 import { ALL_SCALES } from "../constants";
 
 const props = defineProps<{
@@ -70,6 +71,17 @@ const currentScaleName = ALL_SCALES[props.scaleId]?.name || ALL_SCALES[0].name;
       <label class="label">Scale</label>
       <ScaleDropdown :model-value="scaleId" placeholder="Select scale" @update:model-value="onScaleSelect">
         <template #label>{{ currentScaleName }}</template>
+        <template #default="{ select, active }">
+          <DropdownItem
+            v-for="(s, idx) in ALL_SCALES"
+            :key="idx"
+            :value="idx"
+            :active="active"
+            @select="select"
+          >
+            {{ s.name }}
+          </DropdownItem>
+        </template>
       </ScaleDropdown>
     </div>
 
