@@ -1,11 +1,11 @@
 <script setup lang="ts">
 defineProps<{
-  value: string | number;
-  active?: string | number;
+  value: number;
+  active: number;
 }>();
 
-defineEmits<{
-  select: [value: string | number];
+const emit = defineEmits<{
+  select: [value: number];
 }>();
 </script>
 
@@ -13,7 +13,7 @@ defineEmits<{
   <button
     class="dropdown-item"
     :class="{ selected: active === value }"
-    @click="$emit('select', value)"
+    @click="emit('select', value)"
   >
     <slot />
   </button>
@@ -39,6 +39,6 @@ defineEmits<{
 }
 
 .dropdown-item.selected {
-  color: var(--accent);
+  background: var(--bg-secondary);
 }
 </style>

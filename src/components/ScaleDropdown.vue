@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 
-const model = defineModel<string | number | undefined>();
-
-defineProps<{
+const props = defineProps<{
+  modelValue: number;
   placeholder?: string;
+}>();
+
+const emit = defineEmits<{
+  "update:modelValue": [value: number];
 }>();
 
 const open = ref(false);
@@ -14,8 +17,8 @@ function toggle() {
   open.value = !open.value;
 }
 
-function onSelect(value: string | number | undefined) {
-  model.value = value;
+function onSelect(value: number) {
+  emit("update:modelValue", value);
   open.value = false;
 }
 
@@ -25,18 +28,15 @@ function onClickOutside(e: MouseEvent) {
   }
 }
 
-onMounted(() => document.addEventListener("click", onClickOutside));
-onUnmounted(() => document.removeEventListener("click", onClickOutside));
+onMounted(() => document.addEventListener("click", onClickOutside, true));
+onUnmounted(() => document.removeEventListener("click", onClickOutside, true));
 </script>
 
 <template>
   <div ref="triggerRef" class="dropdown">
     <button class="trigger" @click="toggle">
-      <span v-if="model !== undefined" class="trigger-text">
+      <span class="trigger-text">
         <slot name="label" />
-      </span>
-      <span v-else class="trigger-placeholder">
-        {{ placeholder || "Select" }}
       </span>
       <svg
         class="arrow"
@@ -50,8 +50,8 @@ onUnmounted(() => document.removeEventListener("click", onClickOutside));
         <polyline points="6 9 12 15 18 9" />
       </svg>
     </button>
-    <div v-if="open" class="menu" @click.stop>
-      <slot :select="onSelect" :active="model" />
+    <div v-if="open" class="menu">
+      <slot :select="onSelect" :active="props.modelValue" />
     </div>
   </div>
 </template>
@@ -77,10 +77,6 @@ onUnmounted(() => document.removeEventListener("click", onClickOutside));
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   text-align: left;
-}
-
-.trigger-placeholder {
-  color: var(--text-tertiary);
 }
 
 .arrow {

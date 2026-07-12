@@ -30,14 +30,12 @@ function onBpmChange(e: Event) {
   }
 }
 
-function onLoad() {
-  emit("load", loadUrl.value);
+function onScaleSelect(value: number) {
+  emit("changeScale", value);
 }
 
-function onScaleSelect(value: string | number | undefined) {
-  if (value !== undefined) {
-    emit("changeScale", Number(value));
-  }
+function onLoad() {
+  emit("load", loadUrl.value);
 }
 
 // Map scaleId to name for label display
