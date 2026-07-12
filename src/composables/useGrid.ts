@@ -16,6 +16,14 @@ export function useGrid() {
   let timerId: ReturnType<typeof setInterval> | null = null;
   const reverb = new Tone.Reverb(0.3).toDestination();
   const feedback = new Tone.FeedbackDelay(0.3, 0.2).toDestination();
+  let audioStarted = false;
+
+  async function ensureAudio() {
+    if (!audioStarted) {
+      await Tone.start();
+      audioStarted = true;
+    }
+  }
 
   function generateSynth(): Tone.Synth {
     return new Tone.Synth().connect(reverb).connect(feedback).toDestination();
@@ -181,10 +189,12 @@ export function useGrid() {
   // Timer controls
   function setTimer() {
     unsetTimer();
-    timerId = setInterval(() => {
-      tick();
-    }, interval.value);
-    timerSet.value = true;
+    ensureAudio().then(() => {
+      timerId = setInterval(() => {
+        tick();
+      }, interval.value);
+      timerSet.value = true;
+    });
   }
 
   function unsetTimer() {
