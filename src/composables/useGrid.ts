@@ -10,7 +10,7 @@ export function useGrid() {
   const synths = shallowRef<Record<number, Tone.Synth>>({});
   const ctr = ref(0);
   const scaleId = ref(0);
-  const selectedDir = ref(-1); // -1 = no selection, 0-3 = direction
+  const selectedDir = ref(0); // 0-3 = direction, -1 = no selection
   const interval = ref(convertBpmToInterval(150));
   const timerSet = ref(false);
 
@@ -187,7 +187,9 @@ export function useGrid() {
     );
 
     if (existingWidgets.length === 0) {
-      addWidget(pos0, pos1, selectedDir.value >= 0 ? selectedDir.value : 0);
+      if (selectedDir.value >= 0) {
+        addWidget(pos0, pos1, selectedDir.value);
+      }
     } else {
       // Remove all widgets at this cell
       const newWidgets = { ...widgets.value };
