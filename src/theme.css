@@ -1,0 +1,67 @@
+/* ===== 浅色主题（默认 / 手动指定） ===== */
+:root,
+[data-theme="light"] {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f5;
+    --bg-tertiary: #ebebeb;
+
+    --text-primary: #000000;
+    --text-secondary: #555555;
+    --text-tertiary: #999999;
+
+    --border-primary: #000000;
+    --border-secondary: #d4d4d4;
+
+    --accent: #000000;
+    --accent-contrast: #ffffff;
+
+    --cell-bg: #fdf4d8;
+    --cell-flash: #e18ae4;
+    --cell-empty: rgb(162, 31, 255);
+    --grid-border: #bcbaec;
+}
+
+/* ===== 深色主题（手动指定） ===== */
+[data-theme="dark"] {
+    --bg-primary: #02050c;
+    --bg-secondary: #1a1a2e;
+    --bg-tertiary: #16213e;
+
+    --text-primary: #e0e0e0;
+    --text-secondary: #8888aa;
+    --text-tertiary: #555577;
+
+    --border-primary: #333356;
+    --border-secondary: #2a2a44;
+
+    --accent: #bcbaec;
+    --accent-contrast: #02050c;
+
+    --cell-bg: #1a1a2e;
+    --cell-flash: #e18ae4;
+    --cell-empty: rgb(162, 31, 255);
+    --grid-border: #333356;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+        --bg-primary: #02050c;
+        --bg-secondary: #1a1a2e;
+        --bg-tertiary: #16213e;
+
+        --text-primary: #e0e0e0;
+        --text-secondary: #8888aa;
+        --text-tertiary: #555577;
+
+        --border-primary: #333356;
+        --border-secondary: #2a2a44;
+
+        --accent: #bcbaec;
+        --accent-contrast: #02050c;
+
+        --cell-bg: #1a1a2e;
+        --cell-flash: #e18ae4;
+        --cell-empty: rgb(162, 31, 255);
+        --grid-border: #333356;
+    }
+}
