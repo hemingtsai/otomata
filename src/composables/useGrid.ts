@@ -189,19 +189,15 @@ export function useGrid() {
     if (existingWidgets.length === 0) {
       addWidget(pos0, pos1, selectedDir.value >= 0 ? selectedDir.value : 0);
     } else {
-      const widget = existingWidgets[0];
-      if (widget.dir < 3) {
-        const newWidgets = { ...widgets.value };
-        newWidgets[widget.idx] = { ...newWidgets[widget.idx], dir: (widget.dir + 1) % 4 };
-        widgets.value = newWidgets;
-      } else {
-        const newWidgets = { ...widgets.value };
-        delete newWidgets[widget.idx];
-        const newSynths = { ...synths.value };
-        delete newSynths[widget.idx];
-        widgets.value = newWidgets;
-        synths.value = newSynths;
-      }
+      // Remove all widgets at this cell
+      const newWidgets = { ...widgets.value };
+      const newSynths = { ...synths.value };
+      existingWidgets.forEach((w) => {
+        delete newWidgets[w.idx];
+        delete newSynths[w.idx];
+      });
+      widgets.value = newWidgets;
+      synths.value = newSynths;
     }
     grid.value = updateGrid();
   }
