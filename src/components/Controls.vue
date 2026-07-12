@@ -20,12 +20,10 @@ const emit = defineEmits<{
 }>();
 
 const loadUrl = ref("");
-const bpmInput = ref(props.bpm);
 
 function onBpmChange(e: Event) {
   const val = parseInt((e.target as HTMLInputElement).value, 10);
   if (!isNaN(val)) {
-    bpmInput.value = val;
     emit("changeBpm", val);
   }
 }

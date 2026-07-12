@@ -1,5 +1,5 @@
 import * as Tone from "tone";
-import { ref, onUnmounted } from "vue";
+import { ref, computed, onUnmounted } from "vue";
 import type { Widget } from "../types";
 import { GRID_SIZE, ALL_SCALES, convertBpmToInterval, convertIntervalToBpm } from "../constants";
 
@@ -14,19 +14,42 @@ export function useGrid() {
   const timerSet = ref(false);
 
   let timerId: ReturnType<typeof setInterval> | null = null;
-  const reverb = new Tone.Reverb(0.3).toDestination();
-  const feedback = new Tone.FeedbackDelay(0.3, 0.2).toDestination();
+
+  // Audio nodes — created lazily after AudioContext is started
+  let reverb: Tone.Reverb | null = null;
+  let feedback: Tone.FeedbackDelay | null = null;
   let audioStarted = false;
 
   async function ensureAudio() {
-    if (!audioStarted) {
+    if (audioStarted) return;
+    try {
       await Tone.start();
-      audioStarted = true;
+      console.log("[Otomata] Tone.start() completed, context state:", Tone.getContext().state);
+    } catch (e) {
+      console.warn("[Otomata] Tone.start() failed, trying resume:", e);
+      await Tone.getContext().resume();
     }
+
+    // Create effects after context is running
+    if (!reverb) {
+      reverb = new Tone.Reverb(0.3).toDestination();
+    }
+    if (!feedback) {
+      feedback = new Tone.FeedbackDelay(0.3, 0.2).toDestination();
+    }
+
+    audioStarted = true;
+    console.log("[Otomata] Audio initialized, context state:", Tone.getContext().state);
   }
 
   function generateSynth(): Tone.Synth {
-    return new Tone.Synth().connect(reverb).connect(feedback).toDestination();
+    const synth = new Tone.Synth();
+    if (reverb && feedback) {
+      synth.connect(reverb).connect(feedback).toDestination();
+    } else {
+      synth.toDestination();
+    }
+    return synth;
   }
 
   function initGrid(): string[][] {
@@ -79,7 +102,9 @@ export function useGrid() {
       val = pos[0];
     }
     const scale = ALL_SCALES[scaleId.value].scale;
-    synth.triggerAttackRelease(scale[val % scale.length], "8n", Tone.now(), 0.3);
+    const note = scale[val % scale.length];
+    console.log("[Otomata] Playing note:", note, "pos:", pos, "dir:", dir);
+    synth.triggerAttackRelease(note, "8n", Tone.now(), 0.3);
   }
 
   function handleCollisions(w: Record<number, Widget>): Record<number, Widget> {
@@ -109,7 +134,6 @@ export function useGrid() {
 
   function tick() {
     // Sound detection: check original state BEFORE any modifications
-    // (original code uses this.state.widgets which is the pre-setState state)
     const soundedRows: number[] = [];
     const soundedCols: number[] = [];
 
@@ -163,12 +187,10 @@ export function useGrid() {
     } else {
       const widget = existingWidgets[0];
       if (widget.dir < 3) {
-        // Rotate
         const newWidgets = { ...widgets.value };
         newWidgets[widget.idx] = { ...newWidgets[widget.idx], dir: (widget.dir + 1) % 4 };
         widgets.value = newWidgets;
       } else {
-        // Delete
         const newWidgets = { ...widgets.value };
         delete newWidgets[widget.idx];
         const newSynths = { ...synths.value };
@@ -189,12 +211,11 @@ export function useGrid() {
   // Timer controls
   function setTimer() {
     unsetTimer();
-    ensureAudio().then(() => {
-      timerId = setInterval(() => {
-        tick();
-      }, interval.value);
-      timerSet.value = true;
-    });
+    timerId = setInterval(() => {
+      tick();
+    }, interval.value);
+    timerSet.value = true;
+    console.log("[Otomata] Timer started, interval:", interval.value, "ms");
   }
 
   function unsetTimer() {
@@ -203,9 +224,14 @@ export function useGrid() {
       timerId = null;
     }
     timerSet.value = false;
+    console.log("[Otomata] Timer stopped");
   }
 
-  function toggleTimer() {
+  // toggleTimer is async so ensureAudio runs with user gesture context intact
+  async function toggleTimer() {
+    if (!audioStarted) {
+      await ensureAudio();
+    }
     if (timerSet.value) {
       unsetTimer();
     } else {
@@ -216,7 +242,7 @@ export function useGrid() {
   function changeBpm(bpm: number) {
     interval.value = convertBpmToInterval(bpm);
     if (timerSet.value) {
-      setTimer(); // restart with new interval
+      setTimer();
     }
   }
 
@@ -224,9 +250,9 @@ export function useGrid() {
     scaleId.value = id;
   }
 
-  const bpm = ref(convertIntervalToBpm(interval.value));
+  const bpm = computed(() => convertIntervalToBpm(interval.value));
 
-  // Flashing cells for visual feedback
+  // Flashing cells
   const flashingCells = ref<Set<string>>(new Set());
   let flashTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
@@ -263,12 +289,10 @@ export function useGrid() {
     const query = queryStr.slice(loc + 3).split("_");
 
     if (query.length === 4) {
-      // New format
       clear();
       scaleId.value = parseInt(query[1], 10) || 0;
       const b = parseInt(query[2], 10) || 150;
       interval.value = convertBpmToInterval(b);
-      bpm.value = b;
       const widgetData = query[3].match(/.{3}/g) || [];
       widgetData.forEach((item) => {
         const p0 = parseInt(item[0], 10);
@@ -279,7 +303,6 @@ export function useGrid() {
       grid.value = updateGrid();
       return true;
     } else if (query.length === 1) {
-      // Old format
       clear();
       const lookup = "qwertyuiopasdfghjklzxcvbnm0123456789";
       const entries = query[0].match(/.{2}/g) || [];
@@ -292,7 +315,6 @@ export function useGrid() {
       });
       scaleId.value = 0;
       interval.value = convertBpmToInterval(150);
-      bpm.value = 150;
       grid.value = updateGrid();
       return true;
     }
@@ -302,8 +324,8 @@ export function useGrid() {
 
   onUnmounted(() => {
     unsetTimer();
-    reverb.dispose();
-    feedback.dispose();
+    reverb?.dispose();
+    feedback?.dispose();
   });
 
   return {
