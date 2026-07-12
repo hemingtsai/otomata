@@ -44,11 +44,10 @@ const currentScaleName = ALL_SCALES[props.scaleId]?.name || ALL_SCALES[0].name;
 
 <template>
   <div class="controls">
-    <div class="row">
+    <div class="row buttons">
       <Button variant="primary" @click="$emit('toggleTimer')">
         {{ timerSet ? "Pause" : "Play" }}
       </Button>
-      <span class="spacer" />
       <Button @click="$emit('clear')">Clear</Button>
     </div>
 
@@ -91,8 +90,6 @@ const currentScaleName = ALL_SCALES[props.scaleId]?.name || ALL_SCALES[0].name;
         placeholder="Paste URL to load..."
         v-model="loadUrl"
       />
-    </div>
-    <div class="row">
       <Button @click="onLoad">Load</Button>
     </div>
   </div>
@@ -112,18 +109,24 @@ const currentScaleName = ALL_SCALES[props.scaleId]?.name || ALL_SCALES[0].name;
   gap: 1.5vh;
 }
 
-.spacer {
+.row.buttons {
+  gap: 1.5vh;
+}
+
+.row.buttons > * {
   flex: 1;
 }
 
 .label {
   font-size: 14px;
   color: var(--text-secondary);
-  min-width: 50px;
+  width: 56px;
+  flex-shrink: 0;
+  text-align: right;
 }
 
 .bpm-input {
-  width: 60px;
+  width: 72px;
   padding: 1vh;
   border: 1px solid var(--border-primary);
   background: var(--bg-primary);
@@ -131,6 +134,7 @@ const currentScaleName = ALL_SCALES[props.scaleId]?.name || ALL_SCALES[0].name;
   font-family: inherit;
   font-size: 14px;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .bpm-input:disabled {
@@ -145,6 +149,7 @@ const currentScaleName = ALL_SCALES[props.scaleId]?.name || ALL_SCALES[0].name;
   color: var(--text-primary);
   font-family: inherit;
   font-size: 14px;
+  min-width: 0;
 }
 
 .url-input::placeholder {
