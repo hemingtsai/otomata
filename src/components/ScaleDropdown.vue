@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, nextTick, onUnmounted } from "vue";
 
 const props = defineProps<{
   modelValue: number;
@@ -13,28 +13,38 @@ const emit = defineEmits<{
 const open = ref(false);
 const triggerRef = ref<HTMLDivElement>();
 
-function toggle() {
-  open.value = !open.value;
+function closeOnOutside(e: MouseEvent) {
+  if (triggerRef.value && !triggerRef.value.contains(e.target as Node)) {
+    open.value = false;
+    document.removeEventListener("click", closeOnOutside);
+  }
+}
+
+async function toggle() {
+  if (open.value) {
+    open.value = false;
+    document.removeEventListener("click", closeOnOutside);
+  } else {
+    open.value = true;
+    await nextTick();
+    document.addEventListener("click", closeOnOutside);
+  }
 }
 
 function onSelect(value: number) {
   emit("update:modelValue", value);
   open.value = false;
+  document.removeEventListener("click", closeOnOutside);
 }
 
-function onClickOutside(e: MouseEvent) {
-  if (triggerRef.value && !triggerRef.value.contains(e.target as Node)) {
-    open.value = false;
-  }
-}
-
-onMounted(() => document.addEventListener("click", onClickOutside, true));
-onUnmounted(() => document.removeEventListener("click", onClickOutside, true));
+onUnmounted(() => {
+  document.removeEventListener("click", closeOnOutside);
+});
 </script>
 
 <template>
   <div ref="triggerRef" class="dropdown">
-    <button class="trigger" @click="toggle">
+    <button class="trigger" @click.stop="toggle">
       <span class="trigger-text">
         <slot name="label" />
       </span>
@@ -50,7 +60,7 @@ onUnmounted(() => document.removeEventListener("click", onClickOutside, true));
         <polyline points="6 9 12 15 18 9" />
       </svg>
     </button>
-    <div v-if="open" class="menu">
+    <div v-if="open" class="menu" @click.stop>
       <slot :select="onSelect" :active="props.modelValue" />
     </div>
   </div>
