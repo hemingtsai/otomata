@@ -103,73 +103,80 @@ export function useGrid() {
     synth.triggerAttackRelease(note, "8n", Tone.now(), 0.3);
   }
 
-  function handleCollisions(w: Record<number, Widget>): Record<number, Widget> {
-    const newWidgets = JSON.parse(JSON.stringify(w)) as Record<number, Widget>;
-
-    const posMap = new Map<string, number[]>();
-    Object.values(newWidgets).forEach((widget) => {
-      const key = widget.pos.join(",");
-      if (!posMap.has(key)) posMap.set(key, []);
-      posMap.get(key)!.push(widget.idx);
-    });
-
-    posMap.forEach((ids) => {
-      if (ids.length >= 3) {
-        ids.forEach((id) => {
-          newWidgets[id].dir = (newWidgets[id].dir + 2) % 4;
-        });
-      } else if (ids.length === 2) {
-        ids.forEach((id) => {
-          newWidgets[id].dir = (newWidgets[id].dir + 1) % 4;
-        });
-      }
-    });
-
-    return newWidgets;
+  function shallowCopyWidgets(src: Record<number, Widget>): Record<number, Widget> {
+    const dst: Record<number, Widget> = {};
+    for (const key in src) {
+      const w = src[key];
+      dst[key] = { idx: w.idx, pos: [w.pos[0], w.pos[1]], dir: w.dir };
+    }
+    return dst;
   }
 
   function tick() {
-    // Sound detection: check original state BEFORE any modifications
+    const curWidgets = widgets.value;
+    const curSynths = synths.value;
+
+    // Sound detection on original state (before any movement)
     const soundedRows: number[] = [];
     const soundedCols: number[] = [];
 
-    Object.keys(widgets.value).forEach((idx) => {
-      const widget = widgets.value[Number(idx)];
+    for (const idx in curWidgets) {
+      const widget = curWidgets[idx];
       if (didHitWall(widget.pos, widget.dir)) {
-        makeSound(widget.pos, widget.dir, synths.value[Number(idx)]);
-        if (widget.dir % 2 === 1) {
+        makeSound(widget.pos, widget.dir, curSynths[idx]);
+        if (widget.dir & 1) {
           soundedRows.push(widget.pos[1]);
         } else {
           soundedCols.push(widget.pos[0]);
         }
       }
+    }
+
+    // Fast shallow copy — avoids JSON serialization overhead
+    const next = shallowCopyWidgets(curWidgets);
+
+    // Collision detection
+    const posMap = new Map<string, number[]>();
+    for (const idx in next) {
+      const w = next[idx];
+      const key = w.pos[0] + "," + w.pos[1];
+      const arr = posMap.get(key);
+      if (arr) arr.push(w.idx);
+      else posMap.set(key, [w.idx]);
+    }
+
+    posMap.forEach((ids) => {
+      if (ids.length >= 3) {
+        for (let i = 0; i < ids.length; i++) {
+          next[ids[i]].dir = (next[ids[i]].dir + 2) & 3;
+        }
+      } else if (ids.length === 2) {
+        for (let i = 0; i < ids.length; i++) {
+          next[ids[i]].dir = (next[ids[i]].dir + 1) & 3;
+        }
+      }
     });
 
-    // Handle collisions, then move widgets
-    let w = JSON.parse(JSON.stringify(widgets.value)) as Record<number, Widget>;
-    w = handleCollisions(w);
+    // Move widgets (mutate in-place)
+    const last = gridSize;
+    for (const idx in next) {
+      const widget = next[idx];
+      const p = widget.pos;
 
-    Object.keys(w).forEach((idx) => {
-      const widget = w[Number(idx)];
-      if (didHitWall(widget.pos, widget.dir)) {
-        widget.dir = (widget.dir + 2) % 4;
+      if (didHitWall(p, widget.dir)) {
+        widget.dir = (widget.dir + 2) & 3;
       }
 
-      const last = gridSize;
-      if (widget.dir === 2) {
-        widget.pos = [widget.pos[0], (widget.pos[1] + 1 + last) % last];
-      } else if (widget.dir === 0) {
-        widget.pos = [widget.pos[0], (widget.pos[1] - 1 + last) % last];
-      } else if (widget.dir === 1) {
-        widget.pos = [(widget.pos[0] + 1 + last) % last, widget.pos[1]];
-      } else {
-        widget.pos = [(widget.pos[0] - 1 + last) % last, widget.pos[1]];
+      switch (widget.dir) {
+        case 2: p[1] = (p[1] + 1) % last; break;
+        case 0: p[1] = (p[1] - 1 + last) % last; break;
+        case 1: p[0] = (p[0] + 1) % last; break;
+        case 3: p[0] = (p[0] - 1 + last) % last; break;
       }
-    });
+    }
 
-    widgets.value = w;
+    widgets.value = next;
     grid.value = updateGrid();
-
     flashCells({ rows: soundedRows, cols: soundedCols });
   }
 
