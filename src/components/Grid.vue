@@ -73,6 +73,6 @@ table {
 }
 
 .cell.flashing:not(.filled) {
-  background-color: var(--accent);
+  background-color: var(--bg-secondary);
 }
 </style>
