@@ -8,6 +8,7 @@ const props = defineProps<{
   bpm: number;
   scaleId: number;
   selectedDir: number;
+  gridSize: number;
 }>();
 
 const emit = defineEmits<{
@@ -16,6 +17,7 @@ const emit = defineEmits<{
   changeBpm: [bpm: number];
   changeScale: [id: number];
   selectDir: [dir: number];
+  changeGridSize: [size: number];
   load: [url: string];
 }>();
 
@@ -74,6 +76,19 @@ function onLoad() {
     <div class="row">
       <label class="label">Scale</label>
       <ScaleDropdown :model-value="scaleId" @update:model-value="onScaleSelect" />
+    </div>
+
+    <div class="row">
+      <label class="label">Size</label>
+      <input
+        class="bpm-input"
+        type="number"
+        min="3"
+        max="9"
+        :value="gridSize"
+        :disabled="timerSet"
+        @change="e => { const v = parseInt((e.target as HTMLInputElement).value, 10); if (!isNaN(v)) $emit('changeGridSize', v); }"
+      />
     </div>
 
     <div class="divider" />

@@ -15,11 +15,13 @@ const {
   clear,
   changeBpm,
   changeScale,
+  changeGridSize,
   getURL,
   loadFromQuery,
   flashingCells,
   selectedDir,
   setSelectedDir,
+  gridSize,
 } = useGrid();
 
 const showUrl = ref(false);
@@ -80,6 +82,7 @@ onUnmounted(() => {
       <Grid
         :grid="grid"
         :flashing-cells="flashingCells"
+        :grid-size="gridSize"
         @cell-click="handleCellClick"
       />
     </div>
@@ -90,11 +93,13 @@ onUnmounted(() => {
         :bpm="bpm"
         :scale-id="scaleId"
         :selected-dir="selectedDir"
+        :grid-size="gridSize"
         @toggle-timer="toggleTimer"
         @clear="clear"
         @change-bpm="changeBpm"
         @change-scale="changeScale"
         @select-dir="setSelectedDir"
+        @change-grid-size="changeGridSize"
         @load="onLoad"
       />
       <div class="url-row">

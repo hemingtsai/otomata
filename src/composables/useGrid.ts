@@ -1,10 +1,10 @@
 import * as Tone from "tone";
 import { ref, computed, shallowRef, onUnmounted } from "vue";
 import type { Widget } from "../types";
-import { GRID_SIZE, ALL_SCALES, convertBpmToInterval, convertIntervalToBpm } from "../constants";
+import { DEFAULT_GRID_SIZE, GRID_SIZE_MIN, GRID_SIZE_MAX, ALL_SCALES, convertBpmToInterval, convertIntervalToBpm } from "../constants";
 
 export function useGrid() {
-  const gridSize = GRID_SIZE;
+  const gridSize = ref(DEFAULT_GRID_SIZE);
 
   const widgets = shallowRef<Record<number, Widget>>({});
   const synths = shallowRef<Record<number, Tone.Synth>>({});
@@ -51,7 +51,7 @@ export function useGrid() {
   }
 
   function initGrid(): string[][] {
-    return Array.from({ length: gridSize }, () => Array(gridSize).fill(""));
+    return Array.from({ length: gridSize.value }, () => Array(gridSize.value).fill(""));
   }
 
   function updateGrid(): string[][] {
@@ -82,7 +82,7 @@ export function useGrid() {
   }
 
   function didHitWall(pos: [number, number], dir: number): boolean {
-    const last = gridSize - 1;
+    const last = gridSize.value - 1;
     return (
       (dir === 0 && pos[1] === 0) ||
       (dir === 1 && pos[0] === last) ||
@@ -93,7 +93,7 @@ export function useGrid() {
 
   function makeSound(pos: [number, number], dir: number, synth: Tone.Synth) {
     let val = 0;
-    const last = gridSize - 1;
+    const last = gridSize.value - 1;
     if (dir % 2 === 1 && (pos[0] === 0 || pos[0] === last)) {
       val = last - pos[1];
     } else {
@@ -159,7 +159,7 @@ export function useGrid() {
     });
 
     // Move widgets (mutate in-place)
-    const last = gridSize;
+    const last = gridSize.value;
     for (const idx in next) {
       const widget = next[idx];
       const p = widget.pos;
@@ -254,6 +254,14 @@ export function useGrid() {
     scaleId.value = id;
   }
 
+  function changeGridSize(size: number) {
+    const clamped = Math.max(GRID_SIZE_MIN, Math.min(GRID_SIZE_MAX, size));
+    if (clamped === gridSize.value) return;
+    unsetTimer();
+    gridSize.value = clamped;
+    clear();
+  }
+
   const bpm = computed(() => convertIntervalToBpm(interval.value));
 
   // Flashing cells
@@ -262,8 +270,8 @@ export function useGrid() {
 
   function flashCells(sounded: { rows: number[]; cols: number[] }) {
     const cells = new Set<string>();
-    for (let r = 0; r < gridSize; r++) {
-      for (let c = 0; c < gridSize; c++) {
+    for (let r = 0; r < gridSize.value; r++) {
+      for (let c = 0; c < gridSize.value; c++) {
         if (sounded.rows.includes(r) || sounded.cols.includes(c)) {
           cells.add(`${r},${c}`);
         }
@@ -345,6 +353,7 @@ export function useGrid() {
     clear,
     changeBpm,
     changeScale,
+    changeGridSize,
     getURL,
     loadFromQuery,
     tick,

@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { GRID_SIZE } from "../constants";
-
 defineProps<{
   grid: string[][];
   flashingCells: Set<string>;
+  gridSize: number;
 }>();
 
 defineEmits<{
@@ -32,7 +31,7 @@ function cellFontSize(val: string): string {
       <tr v-for="(row, rowIdx) in grid" :key="rowIdx">
         <td
           v-for="(cellVal, colIdx) in row"
-          :key="rowIdx * GRID_SIZE + colIdx"
+          :key="rowIdx * gridSize + colIdx"
           class="cell"
           :class="{
             filled: isFilled(grid, rowIdx, colIdx),

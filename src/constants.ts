@@ -1,6 +1,8 @@
 import type { Scale } from "./types";
 
-export const GRID_SIZE = 9;
+export const DEFAULT_GRID_SIZE = 9;
+export const GRID_SIZE_MIN = 3;
+export const GRID_SIZE_MAX = 9;
 export const DEFAULT_INTERVAL = 200;
 
 export const ALL_SCALES: Scale[] = [
