@@ -46,6 +46,18 @@ function onLoad() {
       <Button @click="$emit('clear')">Clear</Button>
     </div>
 
+    <div class="row dir-row">
+      <button
+        v-for="dir in [0, 1, 2, 3]"
+        :key="dir"
+        class="dir-btn"
+        :class="{ active: selectedDir === dir }"
+        @click="$emit('selectDir', dir)"
+      >
+        {{ ['↑', '→', '↓', '←'][dir] }}
+      </button>
+    </div>
+
     <div class="row">
       <label class="label">Tempo</label>
       <input
@@ -62,18 +74,6 @@ function onLoad() {
     <div class="row">
       <label class="label">Scale</label>
       <ScaleDropdown :model-value="scaleId" @update:model-value="onScaleSelect" />
-    </div>
-
-    <div class="row dir-row">
-      <button
-        v-for="dir in [0, 1, 2, 3]"
-        :key="dir"
-        class="dir-btn"
-        :class="{ active: selectedDir === dir }"
-        @click="$emit('selectDir', dir)"
-      >
-        {{ ['↑', '→', '↓', '←'][dir] }}
-      </button>
     </div>
 
     <div class="divider" />
