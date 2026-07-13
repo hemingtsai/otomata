@@ -50,7 +50,7 @@ onUnmounted(() => {
   <div class="app">
     <header class="header">
       <h1 class="title">Otomata</h1>
-      <span class="subtitle">A generative musical sequencer</span>
+      <span class="subtitle">A generative musical sequencer · By Earslap, Kunal Marwaha &amp; Hemingtsai</span>
     </header>
 
     <div class="layout">

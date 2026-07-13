@@ -2,85 +2,31 @@
 
 This was originally written [by Earslap](http://earslap.com/page/otomata.html) using Flash in 2011.
 
-This is [the JavaScript version](https://marwahaha.github.io/otomata).
+The JavaScript version was created by [Kunal Marwaha](https://github.com/marwahaha/otomata).
 
-It will accept URLs from the older Flash versions too. You can find some creations [on this Reddit page](https://www.reddit.com/r/otomata/).
+This version is a complete rewrite by [Hemingtsai](https://github.com/hemingtsai) using Vue 3 + TypeScript + Tauri v2, featuring native desktop support, file save/load, and a clean monochrome design.
 
-If you have any comments or requests, you can open a GitHub issue or email me at marwahaha@berkeley.edu.
+## License
 
-To play the original Flash version, you can [download Flash player](https://www.adobe.com/support/flashplayer/debug_downloads.html). When you run it, use the URL for the [new version](http://www.earslap.com/assets/otomata/iotomata.swf) or the [old version](http://www.earslap.com/assets/otomata/otomata.swf).
+MIT License — see [LICENSE](./LICENSE)
 
----
----
----
+Copyright (c) 2011 Earslap
+Copyright (c) 2020 Kunal Marwaha
+Copyright (c) 2025 Hemingtsai
 
-# Getting Started with Create React App
+## Development
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+```sh
+# Install dependencies
+pnpm install
 
-## Available Scripts
+# Web dev server
+pnpm dev
 
-In the project directory, you can run:
+# Tauri desktop app
+pnpm tauri dev
 
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+# Build
+pnpm build
+pnpm tauri build
+```
