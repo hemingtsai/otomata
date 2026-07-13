@@ -22,6 +22,7 @@ const {
   selectedDir,
   setSelectedDir,
   gridSize,
+  scaleNotes,
 } = useGrid();
 
 const showUrl = ref(false);
@@ -83,6 +84,7 @@ onUnmounted(() => {
         :grid="grid"
         :flashing-cells="flashingCells"
         :grid-size="gridSize"
+        :scale-notes="scaleNotes"
         @cell-click="handleCellClick"
       />
     </div>

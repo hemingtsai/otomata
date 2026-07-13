@@ -264,6 +264,8 @@ export function useGrid() {
 
   const bpm = computed(() => convertIntervalToBpm(interval.value));
 
+  const scaleNotes = computed(() => ALL_SCALES[scaleId.value].scale.slice(0, gridSize.value));
+
   // Flashing cells
   const flashingCells = ref<Set<string>>(new Set());
   let flashTimeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -362,5 +364,6 @@ export function useGrid() {
     flashingCells,
     selectedDir,
     setSelectedDir,
+    scaleNotes,
   };
 }

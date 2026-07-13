@@ -3,6 +3,7 @@ defineProps<{
   grid: string[][];
   flashingCells: Set<string>;
   gridSize: number;
+  scaleNotes: string[];
 }>();
 
 defineEmits<{
@@ -27,8 +28,17 @@ function cellFontSize(val: string): string {
 
 <template>
   <table>
+    <thead>
+      <tr>
+        <th class="corner"></th>
+        <th v-for="(note, colIdx) in scaleNotes" :key="'h' + colIdx" class="header-cell">
+          {{ note }}
+        </th>
+      </tr>
+    </thead>
     <tbody>
       <tr v-for="(row, rowIdx) in grid" :key="rowIdx">
+        <td class="row-label">{{ scaleNotes[gridSize - 1 - rowIdx] }}</td>
         <td
           v-for="(cellVal, colIdx) in row"
           :key="rowIdx * gridSize + colIdx"
@@ -52,6 +62,21 @@ table {
   margin: auto;
   border: 2px solid var(--border-primary);
   border-collapse: collapse;
+}
+
+.corner {
+  border: none;
+  background: transparent;
+}
+
+.header-cell,
+.row-label {
+  font-size: min(1.8vw, 1.8vh);
+  color: var(--text-tertiary);
+  text-align: center;
+  vertical-align: middle;
+  padding: 0 1px;
+  font-weight: 400;
 }
 
 .cell {
