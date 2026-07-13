@@ -10,6 +10,7 @@ export function useGrid() {
   const synths = shallowRef<Record<number, Tone.Synth>>({});
   const ctr = ref(0);
   const scaleId = ref(0);
+  const scaleOffset = ref(0);
   const selectedDir = ref(0); // 0-3 = direction, -1 = no selection
   const interval = ref(convertBpmToInterval(150));
   const timerSet = ref(false);
@@ -100,7 +101,10 @@ export function useGrid() {
       val = pos[0];
     }
     const scale = ALL_SCALES[scaleId.value].scale;
-    const note = scale[val % scale.length];
+    const maxOffset = Math.max(0, scale.length - gridSize.value);
+    const offset = Math.min(scaleOffset.value, maxOffset);
+    const idx = (offset + (val % gridSize.value)) % scale.length;
+    const note = scale[idx];
     synth.triggerAttackRelease(note, "8n", Tone.now(), 0.3);
   }
 
@@ -252,6 +256,13 @@ export function useGrid() {
 
   function changeScale(id: number) {
     scaleId.value = id;
+    scaleOffset.value = 0;
+  }
+
+  function changeScaleOffset(offset: number) {
+    const scale = ALL_SCALES[scaleId.value].scale;
+    const maxOffset = Math.max(0, scale.length - gridSize.value);
+    scaleOffset.value = Math.max(0, Math.min(offset, maxOffset));
   }
 
   function changeGridSize(size: number) {
@@ -259,12 +270,18 @@ export function useGrid() {
     if (clamped === gridSize.value) return;
     unsetTimer();
     gridSize.value = clamped;
+    scaleOffset.value = 0;
     clear();
   }
 
   const bpm = computed(() => convertIntervalToBpm(interval.value));
 
-  const scaleNotes = computed(() => ALL_SCALES[scaleId.value].scale.slice(0, gridSize.value));
+  const scaleNotes = computed(() => {
+    const scale = ALL_SCALES[scaleId.value].scale;
+    const maxOffset = Math.max(0, scale.length - gridSize.value);
+    const offset = Math.min(scaleOffset.value, maxOffset);
+    return scale.slice(offset, offset + gridSize.value);
+  });
 
   // Flashing cells
   const flashingCells = ref<Set<string>>(new Set());
@@ -355,6 +372,7 @@ export function useGrid() {
     clear,
     changeBpm,
     changeScale,
+    changeScaleOffset,
     changeGridSize,
     getURL,
     loadFromQuery,
@@ -365,5 +383,6 @@ export function useGrid() {
     selectedDir,
     setSelectedDir,
     scaleNotes,
+    scaleOffset,
   };
 }

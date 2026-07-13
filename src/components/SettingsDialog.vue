@@ -6,6 +6,7 @@ const props = defineProps<{
   bpm: number;
   scaleId: number;
   gridSize: number;
+  scaleOffset: number;
   timerSet: boolean;
 }>();
 
@@ -14,7 +15,13 @@ const emit = defineEmits<{
   changeBpm: [bpm: number];
   changeScale: [id: number];
   changeGridSize: [size: number];
+  changeScaleOffset: [offset: number];
 }>();
+
+import { ALL_SCALES } from "../constants";
+import { computed } from "vue";
+
+const scaleOffsetMax = computed(() => Math.max(0, ALL_SCALES[props.scaleId].scale.length - props.gridSize));
 </script>
 
 <template>
@@ -51,6 +58,18 @@ const emit = defineEmits<{
       <div class="field">
         <label class="label">Scale</label>
         <ScaleDropdown :model-value="scaleId" @update:model-value="v => $emit('changeScale', v)" />
+      </div>
+
+      <div class="field">
+        <label class="label">Start</label>
+        <input
+          class="input"
+          type="number"
+          min="0"
+          :max="scaleOffsetMax"
+          :value="scaleOffset"
+          @change="e => { const v = parseInt((e.target as HTMLInputElement).value, 10); if (!isNaN(v)) $emit('changeScaleOffset', v); }"
+        />
       </div>
 
       <div class="actions">
