@@ -1,6 +1,7 @@
 <script setup lang="ts">
 defineProps<{
   variant?: "primary" | "secondary";
+  disabled?: boolean;
 }>();
 
 defineEmits<{
@@ -9,7 +10,7 @@ defineEmits<{
 </script>
 
 <template>
-  <button class="btn" :class="variant || 'secondary'" @click="$emit('click')">
+  <button class="btn" :class="variant || 'secondary'" :disabled="disabled" @click="$emit('click')">
     <slot />
   </button>
 </template>
@@ -27,9 +28,8 @@ defineEmits<{
   white-space: nowrap;
 }
 
-.primary {
-  background: var(--accent);
-  color: var(--accent-contrast);
-  border-color: var(--accent);
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 </style>

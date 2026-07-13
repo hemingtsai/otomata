@@ -22,10 +22,11 @@ const emit = defineEmits<{
 
 const currentScale = computed(() => ALL_SCALES[props.scaleId]);
 const selectedCount = computed(() => props.selectedScaleNotes.size);
+const canClose = computed(() => selectedCount.value === props.gridSize);
 </script>
 
 <template>
-  <div class="overlay" @click.self="$emit('close')">
+  <div class="overlay">
     <div class="dialog">
       <h3 class="dialog-title">Settings</h3>
 
@@ -77,7 +78,7 @@ const selectedCount = computed(() => props.selectedScaleNotes.size);
       </div>
 
       <div class="actions">
-        <Button variant="primary" @click="$emit('close')">Done</Button>
+        <Button variant="primary" :disabled="!canClose" @click="$emit('close')">Done</Button>
       </div>
     </div>
   </div>
