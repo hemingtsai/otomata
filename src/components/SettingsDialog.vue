@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import ScaleDropdown from "./ScaleDropdown.vue";
 import Button from "./Button.vue";
+import { ALL_SCALES } from "../constants";
+import { computed } from "vue";
 
 const props = defineProps<{
   bpm: number;
   scaleId: number;
   gridSize: number;
-  scaleOffset: number;
+  selectedScaleNotes: Set<number>;
   timerSet: boolean;
 }>();
 
@@ -15,13 +17,11 @@ const emit = defineEmits<{
   changeBpm: [bpm: number];
   changeScale: [id: number];
   changeGridSize: [size: number];
-  changeScaleOffset: [offset: number];
+  toggleScaleNote: [index: number];
 }>();
 
-import { ALL_SCALES } from "../constants";
-import { computed } from "vue";
-
-const scaleOffsetMax = computed(() => Math.max(0, ALL_SCALES[props.scaleId].scale.length - props.gridSize));
+const currentScale = computed(() => ALL_SCALES[props.scaleId]);
+const selectedCount = computed(() => props.selectedScaleNotes.size);
 </script>
 
 <template>
@@ -60,16 +60,20 @@ const scaleOffsetMax = computed(() => Math.max(0, ALL_SCALES[props.scaleId].scal
         <ScaleDropdown :model-value="scaleId" @update:model-value="v => $emit('changeScale', v)" />
       </div>
 
-      <div class="field">
-        <label class="label">Start</label>
-        <input
-          class="input"
-          type="number"
-          min="0"
-          :max="scaleOffsetMax"
-          :value="scaleOffset"
-          @change="e => { const v = parseInt((e.target as HTMLInputElement).value, 10); if (!isNaN(v)) $emit('changeScaleOffset', v); }"
-        />
+      <div class="field notes-label">
+        <span>{{ selectedCount }} / {{ currentScale.scale.length }} notes</span>
+      </div>
+
+      <div class="notes-grid">
+        <button
+          v-for="(note, idx) in currentScale.scale"
+          :key="idx"
+          class="note-btn"
+          :class="{ selected: selectedScaleNotes.has(idx) }"
+          @click="$emit('toggleScaleNote', idx)"
+        >
+          {{ note }}
+        </button>
       </div>
 
       <div class="actions">
@@ -95,7 +99,7 @@ const scaleOffsetMax = computed(() => Math.max(0, ALL_SCALES[props.scaleId].scal
   border: 1px solid var(--border-primary);
   padding: 3vh;
   width: 90%;
-  max-width: 340px;
+  max-width: 360px;
 }
 
 .dialog-title {
@@ -109,6 +113,12 @@ const scaleOffsetMax = computed(() => Math.max(0, ALL_SCALES[props.scaleId].scal
   align-items: center;
   gap: 1.5vh;
   margin-bottom: 1.5vh;
+}
+
+.notes-label {
+  margin-bottom: 1vh;
+  font-size: 13px;
+  color: var(--text-tertiary);
 }
 
 .label {
@@ -135,8 +145,32 @@ const scaleOffsetMax = computed(() => Math.max(0, ALL_SCALES[props.scaleId].scal
   opacity: 0.5;
 }
 
+.notes-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5vh;
+  margin-bottom: 2vh;
+}
+
+.note-btn {
+  padding: 0.8vh 1.2vh;
+  border: 1px solid var(--border-primary);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.note-btn.selected {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+}
+
 .actions {
-  margin-top: 2vh;
+  margin-top: 1vh;
   display: flex;
   justify-content: flex-end;
 }

@@ -16,7 +16,7 @@ const {
   clear,
   changeBpm,
   changeScale,
-  changeScaleOffset,
+  toggleScaleNote,
   changeGridSize,
   getURL,
   loadFromQuery,
@@ -25,7 +25,7 @@ const {
   setSelectedDir,
   gridSize,
   scaleNotes,
-  scaleOffset,
+  selectedScaleNotes,
 } = useGrid();
 
 const showUrl = ref(false);
@@ -127,13 +127,13 @@ onUnmounted(() => {
       :bpm="bpm"
       :scale-id="scaleId"
       :grid-size="gridSize"
-      :scale-offset="scaleOffset"
+      :selected-scale-notes="selectedScaleNotes"
       :timer-set="timerSet"
       @close="showSettings = false"
       @change-bpm="changeBpm"
       @change-scale="changeScale"
-      @change-scale-offset="changeScaleOffset"
       @change-grid-size="changeGridSize"
+      @toggle-scale-note="toggleScaleNote"
     />
   </div>
 </template>

@@ -10,7 +10,7 @@ export function useGrid() {
   const synths = shallowRef<Record<number, Tone.Synth>>({});
   const ctr = ref(0);
   const scaleId = ref(0);
-  const scaleOffset = ref(0);
+  const selectedScaleNotes = ref(new Set(Array.from({ length: DEFAULT_GRID_SIZE }, (_, i) => i)));
   const selectedDir = ref(0); // 0-3 = direction, -1 = no selection
   const interval = ref(convertBpmToInterval(150));
   const timerSet = ref(false);
@@ -101,10 +101,8 @@ export function useGrid() {
       val = pos[0];
     }
     const scale = ALL_SCALES[scaleId.value].scale;
-    const maxOffset = Math.max(0, scale.length - gridSize.value);
-    const offset = Math.min(scaleOffset.value, maxOffset);
-    const idx = (offset + (val % gridSize.value)) % scale.length;
-    const note = scale[idx];
+    const notes = Array.from(selectedScaleNotes.value).sort((a, b) => a - b);
+    const note = notes.length > 0 ? scale[notes[val % notes.length]] : scale[0];
     synth.triggerAttackRelease(note, "8n", Tone.now(), 0.3);
   }
 
@@ -256,13 +254,24 @@ export function useGrid() {
 
   function changeScale(id: number) {
     scaleId.value = id;
-    scaleOffset.value = 0;
+    const scale = ALL_SCALES[id].scale;
+    const count = Math.min(gridSize.value, scale.length);
+    selectedScaleNotes.value = new Set(Array.from({ length: count }, (_, i) => i));
   }
 
-  function changeScaleOffset(offset: number) {
-    const scale = ALL_SCALES[scaleId.value].scale;
-    const maxOffset = Math.max(0, scale.length - gridSize.value);
-    scaleOffset.value = Math.max(0, Math.min(offset, maxOffset));
+  function toggleScaleNote(index: number) {
+    const notes = new Set(selectedScaleNotes.value);
+    if (notes.has(index)) {
+      notes.delete(index);
+    } else {
+      if (notes.size >= gridSize.value) {
+        // Remove first selected note to make room
+        const first = Array.from(notes).sort((a, b) => a - b)[0];
+        notes.delete(first);
+      }
+      notes.add(index);
+    }
+    selectedScaleNotes.value = notes;
   }
 
   function changeGridSize(size: number) {
@@ -270,7 +279,11 @@ export function useGrid() {
     if (clamped === gridSize.value) return;
     unsetTimer();
     gridSize.value = clamped;
-    scaleOffset.value = 0;
+    // Trim selected notes if too many
+    const current = Array.from(selectedScaleNotes.value).sort((a, b) => a - b);
+    if (current.length > clamped) {
+      selectedScaleNotes.value = new Set(current.slice(0, clamped));
+    }
     clear();
   }
 
@@ -278,9 +291,8 @@ export function useGrid() {
 
   const scaleNotes = computed(() => {
     const scale = ALL_SCALES[scaleId.value].scale;
-    const maxOffset = Math.max(0, scale.length - gridSize.value);
-    const offset = Math.min(scaleOffset.value, maxOffset);
-    return scale.slice(offset, offset + gridSize.value);
+    const indices = Array.from(selectedScaleNotes.value).sort((a, b) => a - b);
+    return indices.map(i => scale[i]);
   });
 
   // Flashing cells
@@ -372,7 +384,7 @@ export function useGrid() {
     clear,
     changeBpm,
     changeScale,
-    changeScaleOffset,
+    toggleScaleNote,
     changeGridSize,
     getURL,
     loadFromQuery,
@@ -383,6 +395,6 @@ export function useGrid() {
     selectedDir,
     setSelectedDir,
     scaleNotes,
-    scaleOffset,
+    selectedScaleNotes,
   };
 }
