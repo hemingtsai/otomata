@@ -31,7 +31,7 @@ export function useGrid() {
 
     if (!polySynth) {
       const reverb = new Tone.Reverb(0.3);
-      const feedback = new Tone.FeedbackDelay(0.3, 0.2);
+      const feedback = new Tone.FeedbackDelay(0.05, 0.2);
       polySynth = new Tone.PolySynth(Tone.Synth);
       polySynth.connect(reverb);
       reverb.connect(feedback);
@@ -92,7 +92,7 @@ export function useGrid() {
     const scale = ALL_SCALES[scaleId.value].scale;
     const notes = Array.from(selectedScaleNotes.value).sort((a, b) => a - b);
     const note = notes.length > 0 ? scale[notes[val % notes.length]] : scale[0];
-    polySynth.triggerAttackRelease(note, "8n", undefined, 0.3);
+    polySynth.triggerAttackRelease(note, "8n", Tone.now(), 0.3);
   }
 
   function shallowCopyWidgets(src: Record<number, Widget>): Record<number, Widget> {
