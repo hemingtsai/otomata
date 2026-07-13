@@ -71,15 +71,7 @@ function onLoad() {
         :disabled="timerSet"
         @change="onBpmChange"
       />
-    </div>
-
-    <div class="row">
-      <label class="label">Scale</label>
-      <ScaleDropdown :model-value="scaleId" @update:model-value="onScaleSelect" />
-    </div>
-
-    <div class="row">
-      <label class="label">Size</label>
+      <label class="label size-label">Size</label>
       <input
         class="bpm-input"
         type="number"
@@ -89,6 +81,11 @@ function onLoad() {
         :disabled="timerSet"
         @change="e => { const v = parseInt((e.target as HTMLInputElement).value, 10); if (!isNaN(v)) $emit('changeGridSize', v); }"
       />
+    </div>
+
+    <div class="row">
+      <label class="label">Scale</label>
+      <ScaleDropdown :model-value="scaleId" @update:model-value="onScaleSelect" />
     </div>
 
     <div class="divider" />
@@ -132,6 +129,10 @@ function onLoad() {
   width: 56px;
   flex-shrink: 0;
   text-align: right;
+}
+
+.size-label {
+  margin-left: 1.5vh;
 }
 
 .bpm-input {
