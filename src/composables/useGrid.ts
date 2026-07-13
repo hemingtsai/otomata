@@ -7,7 +7,6 @@ export function useGrid() {
   const gridSize = ref(DEFAULT_GRID_SIZE);
 
   const widgets = shallowRef<Record<number, Widget>>({});
-  const synths = shallowRef<Record<number, Tone.Synth>>({});
   const ctr = ref(0);
   const scaleId = ref(0);
   const selectedScaleNotes = ref(new Set(Array.from({ length: DEFAULT_GRID_SIZE }, (_, i) => i)));
@@ -19,10 +18,8 @@ export function useGrid() {
 
   let timerId: ReturnType<typeof setInterval> | null = null;
 
-  // Audio nodes — created lazily after AudioContext is started
-  let reverb: Tone.Reverb | null = null;
-  let feedback: Tone.FeedbackDelay | null = null;
   let audioStarted = false;
+  let polySynth: Tone.PolySynth | null = null;
 
   async function ensureAudio() {
     if (audioStarted) return;
@@ -32,25 +29,16 @@ export function useGrid() {
       await Tone.getContext().resume();
     }
 
-    // Create effects after context is running
-    if (!reverb) {
-      reverb = new Tone.Reverb(0.3).toDestination();
-    }
-    if (!feedback) {
-      feedback = new Tone.FeedbackDelay(0.3, 0.2).toDestination();
+    if (!polySynth) {
+      const reverb = new Tone.Reverb(0.3);
+      const feedback = new Tone.FeedbackDelay(0.3, 0.2);
+      polySynth = new Tone.PolySynth(Tone.Synth);
+      polySynth.connect(reverb);
+      reverb.connect(feedback);
+      feedback.toDestination();
     }
 
     audioStarted = true;
-  }
-
-  function generateSynth(): Tone.Synth {
-    const synth = new Tone.Synth();
-    if (reverb && feedback) {
-      synth.connect(reverb).connect(feedback).toDestination();
-    } else {
-      synth.toDestination();
-    }
-    return synth;
   }
 
   function initGrid(): string[][] {
@@ -77,9 +65,7 @@ export function useGrid() {
   function addWidget(pos0: number, pos1: number, dir = 0) {
     const idx = ctr.value;
     const newWidgets = { ...widgets.value, [idx]: { idx, pos: [pos0, pos1] as [number, number], dir } };
-    const newSynths = { ...synths.value, [idx]: generateSynth() };
     widgets.value = newWidgets;
-    synths.value = newSynths;
     ctr.value++;
     grid.value = updateGrid();
   }
@@ -94,7 +80,8 @@ export function useGrid() {
     );
   }
 
-  function makeSound(pos: [number, number], dir: number, synth: Tone.Synth) {
+  function makeSound(pos: [number, number], dir: number) {
+    if (!polySynth) return;
     let val = 0;
     const last = gridSize.value - 1;
     if (dir % 2 === 1 && (pos[0] === 0 || pos[0] === last)) {
@@ -105,7 +92,7 @@ export function useGrid() {
     const scale = ALL_SCALES[scaleId.value].scale;
     const notes = Array.from(selectedScaleNotes.value).sort((a, b) => a - b);
     const note = notes.length > 0 ? scale[notes[val % notes.length]] : scale[0];
-    synth.triggerAttackRelease(note, "8n", Tone.now(), 0.3);
+    polySynth.triggerAttackRelease(note, "8n", undefined, 0.3);
   }
 
   function shallowCopyWidgets(src: Record<number, Widget>): Record<number, Widget> {
@@ -119,16 +106,14 @@ export function useGrid() {
 
   function tick() {
     const curWidgets = widgets.value;
-    const curSynths = synths.value;
 
-    // Sound detection on original state (before any movement)
     const soundedRows: number[] = [];
     const soundedCols: number[] = [];
 
     for (const idx in curWidgets) {
       const widget = curWidgets[idx];
       if (didHitWall(widget.pos, widget.dir)) {
-        makeSound(widget.pos, widget.dir, curSynths[idx]);
+        makeSound(widget.pos, widget.dir);
         if (widget.dir & 1) {
           soundedRows.push(widget.pos[1]);
         } else {
@@ -197,13 +182,10 @@ export function useGrid() {
     } else {
       // Remove all widgets at this cell
       const newWidgets = { ...widgets.value };
-      const newSynths = { ...synths.value };
       existingWidgets.forEach((w) => {
         delete newWidgets[w.idx];
-        delete newSynths[w.idx];
       });
       widgets.value = newWidgets;
-      synths.value = newSynths;
     }
     grid.value = updateGrid();
   }
@@ -214,7 +196,6 @@ export function useGrid() {
 
   function clear() {
     widgets.value = {};
-    synths.value = {};
     grid.value = initGrid();
   }
 
@@ -257,16 +238,12 @@ export function useGrid() {
   function restorePrePlay() {
     if (!prePlayState.value || timerSet.value) return;
     const snap = prePlayState.value;
-    // Remove current widgets not in snapshot
     const newWidgets: Record<number, Widget> = {};
-    const newSynths: Record<number, Tone.Synth> = {};
     for (const idx in snap) {
       const s = snap[idx];
       newWidgets[idx] = { idx: Number(idx), pos: [s.pos[0], s.pos[1]], dir: s.dir };
-      newSynths[idx] = synths.value[idx] || generateSynth();
     }
     widgets.value = newWidgets;
-    synths.value = newSynths;
     grid.value = updateGrid();
     prePlayState.value = null;
   }
@@ -422,17 +399,14 @@ export function useGrid() {
       interval.value = convertBpmToInterval(data.bpm ?? 150);
       selectedScaleNotes.value = new Set(data.selectedNotes ?? []);
       const newWidgets: Record<number, Widget> = {};
-      const newSynths: Record<number, Tone.Synth> = {};
       let maxIdx = 0;
       for (const idx in data.current) {
         const w = data.current[idx];
         const i = Number(idx);
         newWidgets[i] = { idx: i, pos: [w.pos[0], w.pos[1]], dir: w.dir };
-        newSynths[i] = generateSynth();
         if (i > maxIdx) maxIdx = i;
       }
       widgets.value = newWidgets;
-      synths.value = newSynths;
       ctr.value = maxIdx + 1;
       prePlayState.value = data.prePlay || null;
       grid.value = updateGrid();
@@ -444,8 +418,7 @@ export function useGrid() {
 
   onUnmounted(() => {
     unsetTimer();
-    reverb?.dispose();
-    feedback?.dispose();
+    polySynth?.dispose();
   });
 
   return {
