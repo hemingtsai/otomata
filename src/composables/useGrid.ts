@@ -414,58 +414,53 @@ export function useGrid() {
 
   function saveToFile() {
     const data = JSON.stringify(buildSaveData(), null, 2);
-    // Tauri native dialog
-    if (window.__TAURI__) {
-      import("@tauri-apps/plugin-dialog").then(({ save }) => {
-        import("@tauri-apps/plugin-fs").then(({ writeTextFile }) => {
-          save({ filters: [{ name: "JSON", extensions: ["json"] }], defaultPath: "otomata-session.json" })
-            .then(path => { if (path) writeTextFile(path, data); });
-        });
-      });
-      return;
-    }
-    // Web fallback
-    const blob = new Blob([data], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "otomata-session.json";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // Try Tauri native dialog, fall back to browser download
+    const tryTauri = async () => {
+      if (!window.__TAURI__) throw new Error("not tauri");
+      const { save } = await import("@tauri-apps/plugin-dialog");
+      const { writeTextFile } = await import("@tauri-apps/plugin-fs");
+      const path = await save({ filters: [{ name: "JSON", extensions: ["json"] }], defaultPath: "otomata-session.json" });
+      if (!path) throw new Error("cancelled");
+      await writeTextFile(path, data);
+    };
+    tryTauri().catch(() => {
+      const blob = new Blob([data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "otomata-session.json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
   }
 
   function loadFromFilePrompt() {
-    // Tauri native dialog
-    if (window.__TAURI__) {
-      import("@tauri-apps/plugin-dialog").then(({ open }) => {
-        import("@tauri-apps/plugin-fs").then(({ readTextFile }) => {
-          open({ filters: [{ name: "JSON", extensions: ["json"] }] }).then(selected => {
-            if (selected) {
-              readTextFile(selected as string).then(content => {
-                if (!loadFromFile(content)) alert("Invalid save file");
-              });
-            }
-          });
-        });
-      });
-      return;
-    }
-    // Web fallback
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".json";
-    input.onchange = () => {
-      const file = input.files?.[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (!loadFromFile(reader.result as string)) alert("Invalid save file");
-      };
-      reader.readAsText(file);
+    const tryTauri = async () => {
+      if (!window.__TAURI__) throw new Error("not tauri");
+      const { open } = await import("@tauri-apps/plugin-dialog");
+      const { readTextFile } = await import("@tauri-apps/plugin-fs");
+      const selected = await open({ filters: [{ name: "JSON", extensions: ["json"] }] });
+      if (!selected) throw new Error("cancelled");
+      const content = await readTextFile(selected as string);
+      if (!loadFromFile(content)) alert("Invalid save file");
     };
-    input.click();
+    tryTauri().catch(() => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".json";
+      input.onchange = () => {
+        const file = input.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (!loadFromFile(reader.result as string)) alert("Invalid save file");
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    });
   }
 
   function loadFromFile(content: string): boolean {
