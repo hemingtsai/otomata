@@ -3,7 +3,6 @@ import { onMounted, onUnmounted, ref } from "vue";
 import Grid from "./components/Grid.vue";
 import Controls from "./components/Controls.vue";
 import SettingsDialog from "./components/SettingsDialog.vue";
-import Button from "./components/Button.vue";
 import { useGrid } from "./composables/useGrid";
 
 const {
@@ -18,8 +17,6 @@ const {
   changeScale,
   toggleScaleNote,
   changeGridSize,
-  getURL,
-  loadFromQuery,
   flashingCells,
   selectedDir,
   setSelectedDir,
@@ -32,32 +29,7 @@ const {
   loadFromFilePrompt,
 } = useGrid();
 
-const showUrl = ref(false);
 const showSettings = ref(false);
-const currentUrl = ref("");
-
-function onGetURL() {
-  currentUrl.value = getURL();
-  showUrl.value = true;
-}
-
-function copyURL() {
-  navigator.clipboard.writeText(currentUrl.value).catch(() => {
-    // Fallback: select the text
-    const textarea = document.createElement("textarea");
-    textarea.value = currentUrl.value;
-    document.body.appendChild(textarea);
-    textarea.select();
-    document.execCommand("copy");
-    document.body.removeChild(textarea);
-  });
-}
-
-function onLoad(url: string) {
-  loadFromQuery(url);
-}
-
-// Space bar toggle
 function onKeyDown(e: KeyboardEvent) {
   if (e.code === "Space" && e.target === document.body) {
     e.preventDefault();
@@ -67,12 +39,6 @@ function onKeyDown(e: KeyboardEvent) {
 
 onMounted(() => {
   document.addEventListener("keydown", onKeyDown);
-
-  // Load URL from query string if present
-  const search = window.location.search;
-  if (search) {
-    loadFromQuery(search);
-  }
 });
 
 onUnmounted(() => {
@@ -110,23 +76,7 @@ onUnmounted(() => {
           @restore="restorePrePlay"
           @save="saveToFile"
           @load-file="loadFromFilePrompt"
-          @load-url="onLoad"
         />
-        <div class="url-row">
-          <Button @click="onGetURL">Get URL</Button>
-        </div>
-      </div>
-    </div>
-
-    <!-- URL overlay -->
-    <div v-if="showUrl" class="overlay" @click.self="showUrl = false">
-      <div class="url-dialog">
-        <p class="url-label">Share this URL:</p>
-        <textarea readonly class="url-text" rows="3">{{ currentUrl }}</textarea>
-        <div class="url-actions">
-          <Button variant="primary" @click="copyURL(); showUrl = false">Copy</Button>
-          <Button @click="showUrl = false">Close</Button>
-        </div>
       </div>
     </div>
 
@@ -209,56 +159,5 @@ onUnmounted(() => {
     max-width: 280px;
     flex-shrink: 0;
   }
-}
-
-.url-row {
-  display: flex;
-  justify-content: center;
-  padding: 0 3vh;
-}
-
-/* URL overlay */
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-}
-
-.url-dialog {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-primary);
-  padding: 3vh;
-  width: 90%;
-  max-width: 420px;
-}
-
-.url-label {
-  margin: 0 0 1.5vh 0;
-  font-size: 15px;
-  color: var(--text-primary);
-}
-
-.url-text {
-  width: 100%;
-  border: 1px solid var(--border-primary);
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  font-family: monospace;
-  font-size: 12px;
-  padding: 1vh;
-  resize: none;
-  box-sizing: border-box;
-  word-break: break-all;
-}
-
-.url-actions {
-  display: flex;
-  gap: 2vh;
-  margin-top: 2vh;
-  justify-content: flex-end;
 }
 </style>

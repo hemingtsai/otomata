@@ -342,55 +342,6 @@ export function useGrid() {
   }
 
   // URL load/save
-  function getURL() {
-    const b = convertIntervalToBpm(interval.value);
-    let widgetStr = "";
-    Object.values(widgets.value).forEach((w) => {
-      widgetStr += w.pos[0].toString() + w.pos[1].toString() + w.dir.toString();
-    });
-    return `https://marwahaha.github.io/otomata/?q=10_${scaleId.value}_${b}_${widgetStr}`;
-  }
-
-  function loadFromQuery(queryStr: string): boolean {
-    const loc = queryStr.indexOf("?q=");
-    if (loc === -1) return false;
-
-    const query = queryStr.slice(loc + 3).split("_");
-
-    if (query.length === 4) {
-      clear();
-      scaleId.value = parseInt(query[1], 10) || 0;
-      const b = parseInt(query[2], 10) || 150;
-      interval.value = convertBpmToInterval(b);
-      const widgetData = query[3].match(/.{3}/g) || [];
-      widgetData.forEach((item) => {
-        const p0 = parseInt(item[0], 10);
-        const p1 = parseInt(item[1], 10);
-        const d = parseInt(item[2], 10);
-        addWidget(p0, p1, d);
-      });
-      grid.value = updateGrid();
-      return true;
-    } else if (query.length === 1) {
-      clear();
-      const lookup = "qwertyuiopasdfghjklzxcvbnm0123456789";
-      const entries = query[0].match(/.{2}/g) || [];
-      entries.forEach((item) => {
-        const p0 = parseInt(item[0], 10);
-        const value = lookup.indexOf(item[1]);
-        const dir = value % 4;
-        const p1 = Math.floor((value - dir) / 4);
-        addWidget(p0, p1, dir);
-      });
-      scaleId.value = 0;
-      interval.value = convertBpmToInterval(150);
-      grid.value = updateGrid();
-      return true;
-    }
-
-    return false;
-  }
-
   // File save/load
   function buildSaveData() {
     const current: Record<string, { pos: [number, number]; dir: number }> = {};
@@ -512,8 +463,6 @@ export function useGrid() {
     changeScale,
     toggleScaleNote,
     changeGridSize,
-    getURL,
-    loadFromQuery,
     tick,
     setTimer,
     unsetTimer,

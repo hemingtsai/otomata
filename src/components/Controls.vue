@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import Button from "./Button.vue";
-
 const props = defineProps<{
   timerSet: boolean;
   selectedDir: number;
@@ -16,14 +13,7 @@ const emit = defineEmits<{
   restore: [];
   save: [];
   loadFile: [];
-  loadUrl: [url: string];
 }>();
-
-const loadUrl = ref("");
-
-function onLoad() {
-  emit("loadUrl", loadUrl.value);
-}
 </script>
 
 <template>
@@ -58,15 +48,6 @@ function onLoad() {
     </div>
 
     <div class="divider" />
-
-    <div class="row">
-      <input
-        class="url-input"
-        placeholder="Paste URL to load..."
-        v-model="loadUrl"
-      />
-      <Button @click="onLoad">Load</Button>
-    </div>
   </div>
 </template>
 
@@ -90,21 +71,6 @@ function onLoad() {
 
 .row.buttons > * {
   flex: 1;
-}
-
-.url-input {
-  flex: 1;
-  padding: 1vh;
-  border: 1px solid var(--border-primary);
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: inherit;
-  font-size: 14px;
-  min-width: 0;
-}
-
-.url-input::placeholder {
-  color: var(--text-tertiary);
 }
 
 .divider {
