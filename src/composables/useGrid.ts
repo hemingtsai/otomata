@@ -422,7 +422,8 @@ export function useGrid() {
       if (!path) return;
       await writeTextFile(path, data);
     };
-    tryTauri().catch(() => {
+    tryTauri().catch((e) => {
+      console.error("Save failed:", e);
       const blob = new Blob([data], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");

@@ -7,10 +7,13 @@
     "core:default",
     "opener:default",
     "dialog:default",
+    "dialog:allow-save",
+    "dialog:allow-open",
     {
       "identifier": "fs:scope",
-      "allow": [{ "path": "$DOWNLOAD/**" }, { "path": "$DOCUMENT/**" }, { "path": "$DESKTOP/**" }]
+      "allow": [{ "path": "$HOME/**" }]
     },
-    "fs:default"
+    "fs:allow-write-text-file",
+    "fs:allow-read-text-file"
   ]
 }
