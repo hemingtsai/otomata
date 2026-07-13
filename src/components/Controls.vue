@@ -28,8 +28,8 @@ const emit = defineEmits<{
       <Button @click="$emit('openSettings')">Settings</Button>
     </div>
 
-    <div class="row buttons" v-if="hasPrePlay && !timerSet">
-      <Button @click="$emit('restore')">Restore</Button>
+    <div class="row buttons">
+      <button class="btn native-btn" :disabled="!hasPrePlay || timerSet" @click="$emit('restore')">Restore</button>
     </div>
 
     <div class="row buttons">
