@@ -29,7 +29,7 @@ function onLoad() {
         {{ timerSet ? "Pause" : "Play" }}
       </Button>
       <Button @click="$emit('clear')">Clear</Button>
-      <Button @click="$emit('openSettings')">⚙</Button>
+      <Button @click="$emit('openSettings')">Settings</Button>
     </div>
 
     <div class="row dir-row">
