@@ -29,7 +29,7 @@ const {
   hasPrePlay,
   restorePrePlay,
   saveToFile,
-  loadFromFile,
+  loadFromFilePrompt,
 } = useGrid();
 
 const showUrl = ref(false);
@@ -55,22 +55,6 @@ function copyURL() {
 
 function onLoad(url: string) {
   loadFromQuery(url);
-}
-
-const fileInput = ref<HTMLInputElement>();
-function triggerLoad() {
-  fileInput.value?.click();
-}
-function onLoadFile(e: Event) {
-  const input = e.target as HTMLInputElement;
-  const file = input.files?.[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    if (!loadFromFile(reader.result as string)) alert("Invalid save file");
-  };
-  reader.readAsText(file);
-  input.value = "";
 }
 
 // Space bar toggle
@@ -125,7 +109,7 @@ onUnmounted(() => {
           @open-settings="showSettings = true"
           @restore="restorePrePlay"
           @save="saveToFile"
-          @load-file="triggerLoad"
+          @load-file="loadFromFilePrompt"
           @load-url="onLoad"
         />
         <div class="url-row">
@@ -159,7 +143,6 @@ onUnmounted(() => {
       @change-grid-size="changeGridSize"
       @toggle-scale-note="toggleScaleNote"
     />
-    <input ref="fileInput" type="file" accept=".json" style="display:none" @change="onLoadFile" />
   </div>
 </template>
 

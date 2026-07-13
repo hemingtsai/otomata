@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^2.11.1",
+    "@tauri-apps/plugin-dialog": "^2.7.1",
+    "@tauri-apps/plugin-fs": "^2.5.1",
     "tone": "^14.7.58",
     "vue": "^3.5.38"
   },
