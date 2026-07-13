@@ -414,59 +414,31 @@ export function useGrid() {
 
   function saveToFile() {
     const data = JSON.stringify(buildSaveData(), null, 2);
-    // Try Tauri dialog first, fall back to browser download
-    const save = async () => {
-      try {
-        const { save } = await import("@tauri-apps/plugin-dialog");
-        const { writeTextFile } = await import("@tauri-apps/plugin-fs");
-        const path = await save({ filters: [{ name: "JSON", extensions: ["json"] }], defaultPath: "otomata-session.json" });
-        if (path) {
-          await writeTextFile(path, data);
-        }
-      } catch {
-        // Web fallback
-        const blob = new Blob([data], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "otomata-session.json";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }
-    };
-    save();
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "otomata-session.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   function loadFromFilePrompt() {
-    const load = async () => {
-      try {
-        const { open } = await import("@tauri-apps/plugin-dialog");
-        const { readTextFile } = await import("@tauri-apps/plugin-fs");
-        const path = await open({ filters: [{ name: "JSON", extensions: ["json"] }] });
-        if (path) {
-          const content = await readTextFile(path as string);
-          if (!loadFromFile(content)) alert("Invalid save file");
-        }
-      } catch {
-        // Web fallback: use hidden file input
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = ".json";
-        input.onchange = (e) => {
-          const file = (e.target as HTMLInputElement).files?.[0];
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = () => {
-            if (!loadFromFile(reader.result as string)) alert("Invalid save file");
-          };
-          reader.readAsText(file);
-        };
-        input.click();
-      }
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (!loadFromFile(reader.result as string)) alert("Invalid save file");
+      };
+      reader.readAsText(file);
     };
-    load();
+    input.click();
   }
 
   function loadFromFile(content: string): boolean {
