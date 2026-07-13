@@ -13,6 +13,7 @@
       "identifier": "fs:scope",
       "allow": [{ "path": "$HOME/**" }]
     },
+    "fs:default",
     "fs:allow-write-text-file",
     "fs:allow-read-text-file"
   ]
