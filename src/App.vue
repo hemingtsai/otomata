@@ -26,6 +26,10 @@ const {
   gridSize,
   scaleNotes,
   selectedScaleNotes,
+  hasPrePlay,
+  restorePrePlay,
+  saveToFile,
+  loadFromFile,
 } = useGrid();
 
 const showUrl = ref(false);
@@ -51,6 +55,22 @@ function copyURL() {
 
 function onLoad(url: string) {
   loadFromQuery(url);
+}
+
+const fileInput = ref<HTMLInputElement>();
+function triggerLoad() {
+  fileInput.value?.click();
+}
+function onLoadFile(e: Event) {
+  const input = e.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    if (!loadFromFile(reader.result as string)) alert("Invalid save file");
+  };
+  reader.readAsText(file);
+  input.value = "";
 }
 
 // Space bar toggle
@@ -98,11 +118,15 @@ onUnmounted(() => {
         <Controls
           :timer-set="timerSet"
           :selected-dir="selectedDir"
+          :has-pre-play="hasPrePlay"
           @toggle-timer="toggleTimer"
           @clear="clear"
           @select-dir="setSelectedDir"
           @open-settings="showSettings = true"
-          @load="onLoad"
+          @restore="restorePrePlay"
+          @save="saveToFile"
+          @load-file="triggerLoad"
+          @load-url="onLoad"
         />
         <div class="url-row">
           <Button @click="onGetURL">Get URL</Button>
@@ -135,6 +159,7 @@ onUnmounted(() => {
       @change-grid-size="changeGridSize"
       @toggle-scale-note="toggleScaleNote"
     />
+    <input ref="fileInput" type="file" accept=".json" style="display:none" @change="onLoadFile" />
   </div>
 </template>
 

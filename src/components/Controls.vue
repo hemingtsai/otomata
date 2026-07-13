@@ -5,6 +5,7 @@ import Button from "./Button.vue";
 const props = defineProps<{
   timerSet: boolean;
   selectedDir: number;
+  hasPrePlay: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -12,13 +13,16 @@ const emit = defineEmits<{
   clear: [];
   selectDir: [dir: number];
   openSettings: [];
-  load: [url: string];
+  restore: [];
+  save: [];
+  loadFile: [];
+  loadUrl: [url: string];
 }>();
 
 const loadUrl = ref("");
 
 function onLoad() {
-  emit("load", loadUrl.value);
+  emit("loadUrl", loadUrl.value);
 }
 </script>
 
@@ -30,6 +34,15 @@ function onLoad() {
       </Button>
       <Button @click="$emit('clear')">Clear</Button>
       <Button @click="$emit('openSettings')">Settings</Button>
+    </div>
+
+    <div class="row buttons" v-if="hasPrePlay && !timerSet">
+      <Button @click="$emit('restore')">Restore</Button>
+    </div>
+
+    <div class="row buttons">
+      <Button @click="$emit('save')" :disabled="timerSet">Save</Button>
+      <Button @click="$emit('loadFile')" :disabled="timerSet">Load</Button>
     </div>
 
     <div class="row dir-row">

@@ -14,6 +14,8 @@ export function useGrid() {
   const selectedDir = ref(0); // 0-3 = direction, -1 = no selection
   const interval = ref(convertBpmToInterval(150));
   const timerSet = ref(false);
+  const prePlayState = shallowRef<Record<number, { pos: [number, number]; dir: number }> | null>(null);
+  const hasPrePlay = computed(() => prePlayState.value !== null);
 
   let timerId: ReturnType<typeof setInterval> | null = null;
 
@@ -241,8 +243,32 @@ export function useGrid() {
     if (timerSet.value) {
       unsetTimer();
     } else {
+      // Save pre-play snapshot
+      const snap: Record<number, { pos: [number, number]; dir: number }> = {};
+      for (const idx in widgets.value) {
+        const w = widgets.value[idx];
+        snap[idx] = { pos: [w.pos[0], w.pos[1]], dir: w.dir };
+      }
+      prePlayState.value = snap;
       setTimer();
     }
+  }
+
+  function restorePrePlay() {
+    if (!prePlayState.value || timerSet.value) return;
+    const snap = prePlayState.value;
+    // Remove current widgets not in snapshot
+    const newWidgets: Record<number, Widget> = {};
+    const newSynths: Record<number, Tone.Synth> = {};
+    for (const idx in snap) {
+      const s = snap[idx];
+      newWidgets[idx] = { idx: Number(idx), pos: [s.pos[0], s.pos[1]], dir: s.dir };
+      newSynths[idx] = synths.value[idx] || generateSynth();
+    }
+    widgets.value = newWidgets;
+    synths.value = newSynths;
+    grid.value = updateGrid();
+    prePlayState.value = null;
   }
 
   function changeBpm(bpm: number) {
@@ -365,6 +391,70 @@ export function useGrid() {
     return false;
   }
 
+  // File save/load
+  function buildSaveData() {
+    const current: Record<string, { pos: [number, number]; dir: number }> = {};
+    for (const idx in widgets.value) {
+      const w = widgets.value[idx];
+      current[idx] = { pos: [w.pos[0], w.pos[1]], dir: w.dir };
+    }
+    const pre: Record<string, { pos: [number, number]; dir: number }> | null = prePlayState.value
+      ? { ...prePlayState.value }
+      : null;
+    return {
+      v: 1,
+      bpm: convertIntervalToBpm(interval.value),
+      scaleId: scaleId.value,
+      gridSize: gridSize.value,
+      selectedNotes: Array.from(selectedScaleNotes.value).sort((a, b) => a - b),
+      current,
+      prePlay: pre,
+    };
+  }
+
+  function saveToFile() {
+    const data = JSON.stringify(buildSaveData(), null, 2);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "otomata-session.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function loadFromFile(content: string): boolean {
+    try {
+      const data = JSON.parse(content);
+      if (!data || data.v !== 1) return false;
+      unsetTimer();
+      scaleId.value = data.scaleId ?? 0;
+      gridSize.value = data.gridSize ?? DEFAULT_GRID_SIZE;
+      interval.value = convertBpmToInterval(data.bpm ?? 150);
+      selectedScaleNotes.value = new Set(data.selectedNotes ?? []);
+      const newWidgets: Record<number, Widget> = {};
+      const newSynths: Record<number, Tone.Synth> = {};
+      let maxIdx = 0;
+      for (const idx in data.current) {
+        const w = data.current[idx];
+        const i = Number(idx);
+        newWidgets[i] = { idx: i, pos: [w.pos[0], w.pos[1]], dir: w.dir };
+        newSynths[i] = generateSynth();
+        if (i > maxIdx) maxIdx = i;
+      }
+      widgets.value = newWidgets;
+      synths.value = newSynths;
+      ctr.value = maxIdx + 1;
+      prePlayState.value = data.prePlay || null;
+      grid.value = updateGrid();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   onUnmounted(() => {
     unsetTimer();
     reverb?.dispose();
@@ -396,5 +486,9 @@ export function useGrid() {
     setSelectedDir,
     scaleNotes,
     selectedScaleNotes,
+    hasPrePlay,
+    restorePrePlay,
+    saveToFile,
+    loadFromFile,
   };
 }
