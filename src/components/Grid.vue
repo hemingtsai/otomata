@@ -1,5 +1,7 @@
 <script setup lang="ts">
-defineProps<{
+import { computed } from "vue";
+
+const props = defineProps<{
   grid: string[][];
   flashingCells: Set<string>;
   gridSize: number;
@@ -9,6 +11,27 @@ defineProps<{
 defineEmits<{
   cellClick: [pos0: number, pos1: number];
 }>();
+
+const cellSize = computed(() => {
+  const cols = props.gridSize + 1;
+  const sizeW = 80 / cols;
+  const sizeH = 70 / cols;
+  return `min(${sizeW}vw, ${sizeH}vh)`;
+});
+
+const cellFont = computed(() => {
+  const cols = props.gridSize + 1;
+  const sizeW = 40 / cols;
+  const sizeH = 40 / cols;
+  return `min(${sizeW}vw, ${sizeH}vh)`;
+});
+
+const labelFont = computed(() => {
+  const cols = props.gridSize + 1;
+  const sizeW = 18 / cols;
+  const sizeH = 18 / cols;
+  return `min(${sizeW}vw, ${sizeH}vh)`;
+});
 
 function isFlashing(flashingCells: Set<string>, row: number, col: number): boolean {
   return flashingCells.has(`${row},${col}`);
@@ -21,13 +44,16 @@ function isFilled(grid: string[][], row: number, col: number): boolean {
 function cellFontSize(val: string): string {
   const len = val.length;
   if (len <= 1) return "";
-  if (len === 2) return "font-size: min(3vw, 3vh)";
-  return "font-size: min(2.4vw, 2.4vh)";
+  const cols = props.gridSize + 1;
+  const s = len === 2 ? 30 : 24;
+  const sizeW = s / cols;
+  const sizeH = s / cols;
+  return `font-size: min(${sizeW}vw, ${sizeH}vh)`;
 }
 </script>
 
 <template>
-  <table>
+  <table :style="{ '--cell-size': cellSize, '--cell-font': cellFont, '--label-font': labelFont }">
     <thead>
       <tr>
         <th class="corner"></th>
@@ -71,7 +97,7 @@ table {
 
 .header-cell,
 .row-label {
-  font-size: min(1.8vw, 1.8vh);
+  font-size: var(--label-font);
   color: var(--text-tertiary);
   text-align: center;
   vertical-align: middle;
@@ -80,11 +106,11 @@ table {
 }
 
 .cell {
-  width: min(8vw, 8vh);
-  height: min(8vw, 8vh);
-  line-height: min(8vw, 8vh);
+  width: var(--cell-size);
+  height: var(--cell-size);
+  line-height: var(--cell-size);
   cursor: pointer;
-  font-size: min(4vw, 4vh);
+  font-size: var(--cell-font);
   font-weight: bolder;
   border: 1px solid var(--border-secondary);
   text-align: center;
