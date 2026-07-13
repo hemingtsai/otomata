@@ -41,8 +41,8 @@ function onLoad() {
     </div>
 
     <div class="row buttons">
-      <Button @click="$emit('save')" :disabled="timerSet">Save</Button>
-      <Button @click="$emit('loadFile')" :disabled="timerSet">Load</Button>
+      <button class="btn native-btn" :disabled="timerSet" @click="$emit('save')">Save</button>
+      <button class="btn native-btn" :disabled="timerSet" @click="$emit('loadFile')">Load</button>
     </div>
 
     <div class="row dir-row">
@@ -136,5 +136,26 @@ function onLoad() {
 .dir-btn.active {
   background: var(--accent);
   color: var(--accent-contrast);
+}
+
+.btn {
+  padding: 1vh 2vh;
+  border: 1px solid var(--border-primary);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.native-btn {
+  flex: 1;
 }
 </style>
