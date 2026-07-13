@@ -413,19 +413,16 @@ export function useGrid() {
   }
 
   function saveToFile() {
-    console.log("saveToFile called");
     const data = JSON.stringify(buildSaveData(), null, 2);
     // Try Tauri native dialog, fall back to browser download
     const tryTauri = async () => {
-      if (!window.__TAURI__) throw new Error("not tauri");
       const { save } = await import("@tauri-apps/plugin-dialog");
       const { writeTextFile } = await import("@tauri-apps/plugin-fs");
       const path = await save({ filters: [{ name: "JSON", extensions: ["json"] }], defaultPath: "otomata-session.json" });
-      if (!path) throw new Error("cancelled");
+      if (!path) return;
       await writeTextFile(path, data);
     };
-    tryTauri().catch((e) => {
-      console.log("Tauri save failed, using web fallback:", e);
+    tryTauri().catch(() => {
       const blob = new Blob([data], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -440,11 +437,10 @@ export function useGrid() {
 
   function loadFromFilePrompt() {
     const tryTauri = async () => {
-      if (!window.__TAURI__) throw new Error("not tauri");
       const { open } = await import("@tauri-apps/plugin-dialog");
       const { readTextFile } = await import("@tauri-apps/plugin-fs");
       const selected = await open({ filters: [{ name: "JSON", extensions: ["json"] }] });
-      if (!selected) throw new Error("cancelled");
+      if (!selected) return;
       const content = await readTextFile(selected as string);
       if (!loadFromFile(content)) alert("Invalid save file");
     };
