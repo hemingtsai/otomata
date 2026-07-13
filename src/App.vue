@@ -3,6 +3,7 @@ import { onMounted, onUnmounted, ref } from "vue";
 import Grid from "./components/Grid.vue";
 import Controls from "./components/Controls.vue";
 import SettingsDialog from "./components/SettingsDialog.vue";
+import LicensesDialog from "./components/LicensesDialog.vue";
 import { useGrid } from "./composables/useGrid";
 
 const {
@@ -30,6 +31,7 @@ const {
 } = useGrid();
 
 const showSettings = ref(false);
+const showLicenses = ref(false);
 function onKeyDown(e: KeyboardEvent) {
   if (e.code === "Space" && e.target === document.body) {
     e.preventDefault();
@@ -50,7 +52,10 @@ onUnmounted(() => {
   <div class="app">
     <header class="header">
       <h1 class="title">Otomata</h1>
-      <span class="subtitle">A generative musical sequencer · By Earslap, Kunal Marwaha &amp; Hemingtsai</span>
+      <span class="subtitle">
+        A generative musical sequencer
+        <button class="license-link" @click="showLicenses = true">Licenses</button>
+      </span>
     </header>
 
     <div class="layout">
@@ -93,6 +98,8 @@ onUnmounted(() => {
       @change-grid-size="changeGridSize"
       @toggle-scale-note="toggleScaleNote"
     />
+
+    <LicensesDialog v-if="showLicenses" @close="showLicenses = false" />
   </div>
 </template>
 
@@ -122,6 +129,23 @@ onUnmounted(() => {
 .subtitle {
   font-size: 13px;
   color: var(--text-tertiary);
+}
+
+.license-link {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  margin-left: 4px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.license-link:hover {
+  color: var(--text-secondary);
 }
 
 .layout {

@@ -20,3 +20,23 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+Third-party licenses:
+
+tone (MIT) — https://github.com/Tonejs/Tone.js
+vue (MIT) — https://github.com/vuejs/core
+@tauri-apps/api (MIT OR Apache-2.0) — https://github.com/tauri-apps/tauri
+@tauri-apps/plugin-dialog (MIT OR Apache-2.0) — https://github.com/tauri-apps/plugins-workspace
+@tauri-apps/plugin-fs (MIT OR Apache-2.0) — https://github.com/tauri-apps/plugins-workspace
+@tauri-apps/cli (MIT OR Apache-2.0) — https://github.com/tauri-apps/tauri
+@iconify/vue (MIT) — https://github.com/iconify/iconify
+@vitejs/plugin-vue (MIT) — https://github.com/vitejs/vite-plugin-vue
+typescript (Apache-2.0) — https://github.com/microsoft/TypeScript
+vite (MIT) — https://github.com/vitejs/vite
+vue-tsc (MIT) — https://github.com/vuejs/language-tools
+tauri (MIT OR Apache-2.0) — https://github.com/tauri-apps/tauri
+tauri-plugin-opener (MIT OR Apache-2.0) — https://github.com/tauri-apps/plugins-workspace
+serde (MIT OR Apache-2.0) — https://github.com/serde-rs/serde
+serde_json (MIT OR Apache-2.0) — https://github.com/serde-rs/json
