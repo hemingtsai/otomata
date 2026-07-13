@@ -79,33 +79,35 @@ onUnmounted(() => {
       <span class="subtitle">A generative musical sequencer</span>
     </header>
 
-    <div class="main-content">
-      <Grid
-        :grid="grid"
-        :flashing-cells="flashingCells"
-        :grid-size="gridSize"
-        :scale-notes="scaleNotes"
-        @cell-click="handleCellClick"
-      />
-    </div>
+    <div class="layout">
+      <div class="main-content">
+        <Grid
+          :grid="grid"
+          :flashing-cells="flashingCells"
+          :grid-size="gridSize"
+          :scale-notes="scaleNotes"
+          @cell-click="handleCellClick"
+        />
+      </div>
 
-    <div class="controls-area">
-      <Controls
-        :timer-set="timerSet"
-        :bpm="bpm"
-        :scale-id="scaleId"
-        :selected-dir="selectedDir"
-        :grid-size="gridSize"
-        @toggle-timer="toggleTimer"
-        @clear="clear"
-        @change-bpm="changeBpm"
-        @change-scale="changeScale"
-        @select-dir="setSelectedDir"
-        @change-grid-size="changeGridSize"
-        @load="onLoad"
-      />
-      <div class="url-row">
-        <Button @click="onGetURL">Get URL</Button>
+      <div class="controls-area">
+        <Controls
+          :timer-set="timerSet"
+          :bpm="bpm"
+          :scale-id="scaleId"
+          :selected-dir="selectedDir"
+          :grid-size="gridSize"
+          @toggle-timer="toggleTimer"
+          @clear="clear"
+          @change-bpm="changeBpm"
+          @change-scale="changeScale"
+          @select-dir="setSelectedDir"
+          @change-grid-size="changeGridSize"
+          @load="onLoad"
+        />
+        <div class="url-row">
+          <Button @click="onGetURL">Get URL</Button>
+        </div>
       </div>
     </div>
 
@@ -151,12 +153,18 @@ onUnmounted(() => {
   color: var(--text-tertiary);
 }
 
+.layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2vh;
+  width: 100%;
+}
+
 .main-content {
-  flex: 1;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  margin-bottom: 2vh;
 }
 
 .controls-area {
@@ -165,6 +173,21 @@ onUnmounted(() => {
   gap: 1vh;
   width: 100%;
   max-width: 400px;
+}
+
+/* Wide screen: grid left, controls right */
+@media (min-width: 900px) {
+  .layout {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .controls-area {
+    width: 280px;
+    max-width: 280px;
+    flex-shrink: 0;
+  }
 }
 
 .url-row {
