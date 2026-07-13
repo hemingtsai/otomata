@@ -1,38 +1,21 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import Button from "./Button.vue";
-import ScaleDropdown from "./ScaleDropdown.vue";
 
 const props = defineProps<{
   timerSet: boolean;
-  bpm: number;
-  scaleId: number;
   selectedDir: number;
-  gridSize: number;
 }>();
 
 const emit = defineEmits<{
   toggleTimer: [];
   clear: [];
-  changeBpm: [bpm: number];
-  changeScale: [id: number];
   selectDir: [dir: number];
-  changeGridSize: [size: number];
+  openSettings: [];
   load: [url: string];
 }>();
 
 const loadUrl = ref("");
-
-function onBpmChange(e: Event) {
-  const val = parseInt((e.target as HTMLInputElement).value, 10);
-  if (!isNaN(val)) {
-    emit("changeBpm", val);
-  }
-}
-
-function onScaleSelect(value: number) {
-  emit("changeScale", value);
-}
 
 function onLoad() {
   emit("load", loadUrl.value);
@@ -46,6 +29,7 @@ function onLoad() {
         {{ timerSet ? "Pause" : "Play" }}
       </Button>
       <Button @click="$emit('clear')">Clear</Button>
+      <Button @click="$emit('openSettings')">⚙</Button>
     </div>
 
     <div class="row dir-row">
@@ -58,34 +42,6 @@ function onLoad() {
       >
         {{ ['↑', '→', '↓', '←'][dir] }}
       </button>
-    </div>
-
-    <div class="row">
-      <label class="label">Tempo</label>
-      <input
-        class="bpm-input"
-        type="number"
-        min="50"
-        max="300"
-        :value="bpm"
-        :disabled="timerSet"
-        @change="onBpmChange"
-      />
-      <label class="label size-label">Size</label>
-      <input
-        class="bpm-input"
-        type="number"
-        min="3"
-        max="9"
-        :value="gridSize"
-        :disabled="timerSet"
-        @change="e => { const v = parseInt((e.target as HTMLInputElement).value, 10); if (!isNaN(v)) $emit('changeGridSize', v); }"
-      />
-    </div>
-
-    <div class="row">
-      <label class="label">Scale</label>
-      <ScaleDropdown :model-value="scaleId" @update:model-value="onScaleSelect" />
     </div>
 
     <div class="divider" />
@@ -121,34 +77,6 @@ function onLoad() {
 
 .row.buttons > * {
   flex: 1;
-}
-
-.label {
-  font-size: 14px;
-  color: var(--text-secondary);
-  width: 56px;
-  flex-shrink: 0;
-  text-align: right;
-}
-
-.size-label {
-  margin-left: 1.5vh;
-}
-
-.bpm-input {
-  width: 72px;
-  padding: 1vh;
-  border: 1px solid var(--border-primary);
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: inherit;
-  font-size: 14px;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.bpm-input:disabled {
-  opacity: 0.5;
 }
 
 .url-input {

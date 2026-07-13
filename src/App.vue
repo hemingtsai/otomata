@@ -2,6 +2,7 @@
 import { onMounted, onUnmounted, ref } from "vue";
 import Grid from "./components/Grid.vue";
 import Controls from "./components/Controls.vue";
+import SettingsDialog from "./components/SettingsDialog.vue";
 import Button from "./components/Button.vue";
 import { useGrid } from "./composables/useGrid";
 
@@ -26,6 +27,7 @@ const {
 } = useGrid();
 
 const showUrl = ref(false);
+const showSettings = ref(false);
 const currentUrl = ref("");
 
 function onGetURL() {
@@ -93,16 +95,11 @@ onUnmounted(() => {
       <div class="controls-area">
         <Controls
           :timer-set="timerSet"
-          :bpm="bpm"
-          :scale-id="scaleId"
           :selected-dir="selectedDir"
-          :grid-size="gridSize"
           @toggle-timer="toggleTimer"
           @clear="clear"
-          @change-bpm="changeBpm"
-          @change-scale="changeScale"
           @select-dir="setSelectedDir"
-          @change-grid-size="changeGridSize"
+          @open-settings="showSettings = true"
           @load="onLoad"
         />
         <div class="url-row">
@@ -122,6 +119,18 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
+
+    <SettingsDialog
+      v-if="showSettings"
+      :bpm="bpm"
+      :scale-id="scaleId"
+      :grid-size="gridSize"
+      :timer-set="timerSet"
+      @close="showSettings = false"
+      @change-bpm="changeBpm"
+      @change-scale="changeScale"
+      @change-grid-size="changeGridSize"
+    />
   </div>
 </template>
 
