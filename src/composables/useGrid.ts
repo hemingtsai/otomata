@@ -19,7 +19,9 @@ export function useGrid() {
   let timerId: ReturnType<typeof setInterval> | null = null;
 
   let audioStarted = false;
-  let polySynth: Tone.PolySynth | null = null;
+  const synthPool: Tone.Synth[] = [];
+  let poolIndex = 0;
+  const POOL_SIZE = 12;
 
   async function ensureAudio() {
     if (audioStarted) return;
@@ -29,13 +31,16 @@ export function useGrid() {
       await Tone.getContext().resume();
     }
 
-    if (!polySynth) {
+    if (synthPool.length === 0) {
       const reverb = new Tone.Reverb(0.3);
       const feedback = new Tone.FeedbackDelay(0.05, 0.2);
-      polySynth = new Tone.PolySynth(Tone.Synth);
-      polySynth.connect(reverb);
       reverb.connect(feedback);
       feedback.toDestination();
+      for (let i = 0; i < POOL_SIZE; i++) {
+        const synth = new Tone.Synth();
+        synth.connect(reverb);
+        synthPool.push(synth);
+      }
     }
 
     audioStarted = true;
@@ -81,7 +86,7 @@ export function useGrid() {
   }
 
   function makeSound(pos: [number, number], dir: number) {
-    if (!polySynth) return;
+    if (synthPool.length === 0) return;
     let val = 0;
     const last = gridSize.value - 1;
     if (dir % 2 === 1 && (pos[0] === 0 || pos[0] === last)) {
@@ -92,7 +97,9 @@ export function useGrid() {
     const scale = ALL_SCALES[scaleId.value].scale;
     const notes = Array.from(selectedScaleNotes.value).sort((a, b) => a - b);
     const note = notes.length > 0 ? scale[notes[val % notes.length]] : scale[0];
-    polySynth.triggerAttackRelease(note, "8n", Tone.now(), 0.3);
+    const synth = synthPool[poolIndex % POOL_SIZE];
+    poolIndex++;
+    synth.triggerAttackRelease(note, "8n", Tone.now(), 0.3);
   }
 
   function shallowCopyWidgets(src: Record<number, Widget>): Record<number, Widget> {
@@ -418,7 +425,7 @@ export function useGrid() {
 
   onUnmounted(() => {
     unsetTimer();
-    polySynth?.dispose();
+    synthPool.forEach(s => s.dispose());
   });
 
   return {
