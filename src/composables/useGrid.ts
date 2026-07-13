@@ -414,6 +414,17 @@ export function useGrid() {
 
   function saveToFile() {
     const data = JSON.stringify(buildSaveData(), null, 2);
+    // Tauri native dialog
+    if (window.__TAURI__) {
+      import("@tauri-apps/plugin-dialog").then(({ save }) => {
+        import("@tauri-apps/plugin-fs").then(({ writeTextFile }) => {
+          save({ filters: [{ name: "JSON", extensions: ["json"] }], defaultPath: "otomata-session.json" })
+            .then(path => { if (path) writeTextFile(path, data); });
+        });
+      });
+      return;
+    }
+    // Web fallback
     const blob = new Blob([data], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -426,6 +437,22 @@ export function useGrid() {
   }
 
   function loadFromFilePrompt() {
+    // Tauri native dialog
+    if (window.__TAURI__) {
+      import("@tauri-apps/plugin-dialog").then(({ open }) => {
+        import("@tauri-apps/plugin-fs").then(({ readTextFile }) => {
+          open({ filters: [{ name: "JSON", extensions: ["json"] }] }).then(selected => {
+            if (selected) {
+              readTextFile(selected as string).then(content => {
+                if (!loadFromFile(content)) alert("Invalid save file");
+              });
+            }
+          });
+        });
+      });
+      return;
+    }
+    // Web fallback
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".json";
